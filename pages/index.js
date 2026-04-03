@@ -15,7 +15,8 @@ export default function Home() {
   const [error, setError] = useState('');
   const [deepError, setDeepError] = useState('');
   const [shareId, setShareId] = useState(null);
-  const [shareStatus, setShareStatus] = useState('idle'); // idle | saving | copied | error
+  const [shareStatus, setShareStatus] = useState('idle');
+  const [shareError, setShareError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,8 +28,8 @@ export default function Home() {
     setDeepAssessment(null);
     setShareId(null);
     setShareStatus('idle');
+    setShareError('');
 
-    // Both calls fire in parallel — quick one surfaces first
     const quickPromise = fetch('/api/assess', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,6 +66,7 @@ export default function Home() {
     setDeepAssessment(null);
     setShareId(null);
     setShareStatus('idle');
+    setShareError('');
     setUrl('');
     window.scrollTo(0, 0);
   };
@@ -81,17 +83,16 @@ export default function Home() {
       if (data.error) throw new Error(data.error);
       const shareUrl = `${window.location.origin}/report/${data.id}`;
       setShareId(shareUrl);
-      // Try clipboard — but do not let it block showing the link
       try {
         await navigator.clipboard.writeText(shareUrl);
         setShareStatus('copied');
         setTimeout(() => setShareStatus('ready'), 1500);
       } catch {
-        // Clipboard blocked — just show the link directly
         setShareStatus('ready');
       }
     } catch (err) {
       console.error('Share error:', err);
+      setShareError(err.message || 'Unknown error');
       setShareStatus('error');
     }
   };
@@ -104,34 +105,40 @@ export default function Home() {
         <title>Value Impact Assessment — PricingWire</title>
         <meta name="description" content="Instantly generate a compelling value story for your company." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>" />
       </Head>
 
       <div style={s.page}>
 
-        {/* ── HEADER ── */}
-        <header style={s.header}>
-          <div style={s.logoLabel}>PricingWire</div>
-          <h1 style={s.heroTitle}>Value Impact Assessment</h1>
+        {/* ── NAV ── */}
+        <nav style={s.nav}>
+          <span style={s.navLogo}>PricingWire</span>
+          <span style={s.navTagline}>Value Impact Assessment</span>
+        </nav>
+
+        {/* ── HERO ── */}
+        <section style={s.hero}>
+          <p style={s.heroEyebrow}>For Technology Innovators</p>
+          <h1 style={s.heroTitle}>What's your most<br /><em>compelling value?</em></h1>
           <p style={s.heroSub}>
-            Instantly generate a compelling value story that highlights{' '}
-            <strong style={{ color: '#4fc3f7' }}>"Why Buy?"</strong> and{' '}
-            <strong style={{ color: '#4fc3f7' }}>"Why Now?"</strong>
+            Enter any company URL and instantly receive a structured value story —
+            built around <strong>Why Buy</strong> and <strong>Why Now</strong>.
           </p>
-        </header>
+        </section>
 
-        {/* ── MAIN ── */}
+        {/* ── INPUT ── */}
         <main style={s.main}>
-
-          {/* Input Card */}
-          <div style={s.card}>
+          <div style={s.inputCard}>
             <form onSubmit={handleSubmit}>
-              <label style={s.label}>Enter your company's website:</label>
+              <label style={s.label}>Company website URL</label>
               <div className="input-row" style={s.inputRow}>
                 <input
                   type="url"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={e => setUrl(e.target.value)}
                   placeholder="https://yourcompany.com"
                   required
                   style={s.input}
@@ -140,44 +147,34 @@ export default function Home() {
                   type="submit"
                   disabled={loading || deepLoading}
                   style={{
-                    ...s.button,
-                    opacity: (loading || deepLoading) ? 0.7 : 1,
+                    ...s.btn,
+                    opacity: (loading || deepLoading) ? 0.6 : 1,
                     cursor: (loading || deepLoading) ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {loading ? '⏳ Analyzing…' : 'Generate Assessment'}
+                  {loading ? 'Analyzing…' : 'Generate →'}
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                style={s.advancedToggle}
-              >
-                Advanced Options {showAdvanced ? '▲' : '▼'}
+              <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} style={s.advToggle}>
+                {showAdvanced ? '▲' : '▼'} Advanced options
               </button>
 
               {showAdvanced && (
-                <div className="advanced-grid" style={s.advancedGrid}>
+                <div className="adv-grid" style={s.advGrid}>
                   <div>
-                    <label style={s.label}>
-                      Target Audience <span style={s.optional}>(optional)</span>
-                    </label>
+                    <label style={s.label}>Target audience <span style={s.optional}>(optional)</span></label>
                     <input
                       type="text"
                       value={targetAudience}
-                      onChange={(e) => setTargetAudience(e.target.value)}
-                      placeholder="e.g. VP of Sales at mid-market SaaS companies"
+                      onChange={e => setTargetAudience(e.target.value)}
+                      placeholder="e.g. VP of Sales at mid-market SaaS"
                       style={s.input}
                     />
                   </div>
                   <div>
                     <label style={s.label}>Tone</label>
-                    <select
-                      value={tone}
-                      onChange={(e) => setTone(e.target.value)}
-                      style={s.input}
-                    >
+                    <select value={tone} onChange={e => setTone(e.target.value)} style={s.input}>
                       <option>Professional and persuasive</option>
                       <option>Bold and direct</option>
                       <option>Consultative and thoughtful</option>
@@ -193,133 +190,112 @@ export default function Home() {
             </form>
           </div>
 
-          {/* Quick Assessment Loading */}
+          {/* Loading */}
           {loading && (
-            <div style={{ ...s.card, textAlign: 'center', padding: '48px 32px' }}>
+            <div style={s.loadingBox}>
               <div style={s.spinner} />
-              <p style={{ color: '#555', marginTop: '16px', fontSize: '15px' }}>
-                Generating your Value Impact Assessment…
-              </p>
+              <p style={s.loadingText}>Analyzing website…</p>
             </div>
           )}
 
-          {error && <div style={s.errorCard}>⚠️ &nbsp;{error}</div>}
+          {error && <div style={s.errorBox}>⚠️ {error}</div>}
 
-          {/* ── QUICK ASSESSMENT RESULTS ── */}
+          {/* ── QUICK ASSESSMENT ── */}
           {assessment && (
-            <div style={s.results}>
-              <div style={s.resultHeader}>
+            <div style={s.resultsWrap}>
+
+              {/* Company headline */}
+              <div style={s.companyBlock}>
                 <div style={s.companyName}>{assessment.companyName}</div>
-                <p style={s.overviewText}>{assessment.companyOverview}</p>
-                <div style={s.valueLine}>"{assessment.valueHeadline}"</div>
+                <p style={s.valueHeadline}>"{assessment.valueHeadline}"</p>
+                <p style={s.companyOverview}>{assessment.companyOverview}</p>
               </div>
 
-              <div className="grid-2col" style={s.grid}>
-                <div style={{ ...s.resultCard, borderTopColor: '#4fc3f7' }}>
-                  <h3 style={s.sectionTitle}>⭐ Most Compelling Value</h3>
-                  <p style={s.bodyText}>{assessment.mcv}</p>
+              <div style={s.divider} />
+
+              {/* MCV + Buyer */}
+              <div className="grid-2" style={s.grid2}>
+                <div style={s.block}>
+                  <div style={s.blockLabel}>⭐ Most Compelling Value</div>
+                  <p style={s.blockText}>{assessment.mcv}</p>
                 </div>
-                <div style={{ ...s.resultCard, borderTopColor: '#a78bfa' }}>
-                  <h3 style={s.sectionTitle}>🎯 Ideal Target Buyer</h3>
-                  <p style={s.bodyText}>{assessment.targetBuyer}</p>
+                <div style={s.block}>
+                  <div style={s.blockLabel}>🎯 Ideal Target Buyer</div>
+                  <p style={s.blockText}>{assessment.targetBuyer}</p>
                 </div>
               </div>
 
-              <div className="grid-2col" style={s.grid}>
-                <div style={{ ...s.resultCard, borderTopColor: '#34d399' }}>
-                  <h3 style={s.sectionTitle}>✅ Why Buy?</h3>
-                  <ul style={s.list}>
+              <div style={s.divider} />
+
+              {/* Why Buy + Why Now */}
+              <div className="grid-2" style={s.grid2}>
+                <div style={s.block}>
+                  <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
+                  <ul style={s.ul}>
                     {assessment.whyBuy.map((item, i) => (
-                      <li key={i} style={s.listItem}>{item}</li>
+                      <li key={i} style={s.li}>{item}</li>
                     ))}
                   </ul>
                 </div>
-                <div style={{ ...s.resultCard, borderTopColor: '#f59e0b' }}>
-                  <h3 style={s.sectionTitle}>⚡ Why Now?</h3>
-                  <ul style={s.list}>
+                <div style={s.block}>
+                  <div style={{ ...s.blockLabel, color: '#d97706' }}>⚡ Why Now?</div>
+                  <ul style={s.ul}>
                     {assessment.whyNow.map((item, i) => (
-                      <li key={i} style={s.listItem}>{item}</li>
+                      <li key={i} style={s.li}>{item}</li>
                     ))}
                   </ul>
                 </div>
               </div>
+
             </div>
           )}
 
-          {/* ── EXECUTIVE DEEP-DIVE SECTION ── */}
+          {/* ── DEEP DIVE ── */}
           {showDeepSection && (
-            <div style={s.deepSection}>
-              <div style={s.deepDivider}>
-                <div style={s.deepDividerLine} />
-                <div style={s.deepDividerLabel}>⚡ Executive Deep-Dive Analysis</div>
-                <div style={s.deepDividerLine} />
+            <div style={s.deepWrap}>
+              <div style={s.deepHeader}>
+                <span style={s.deepPill}>Executive Deep-Dive</span>
+                <p style={s.deepSubtitle}>Multi-page analysis · CEO · CRO · CFO</p>
               </div>
 
               {deepLoading && (
-                <div style={{ ...s.card, textAlign: 'center', padding: '48px 32px' }}>
-                  <div style={s.spinnerDeep} />
-                  <p style={{ color: '#555', marginTop: '16px', fontSize: '15px' }}>
-                    Crawling subpages and building executive analysis…
-                  </p>
-                  <p style={{ color: '#aaa', marginTop: '8px', fontSize: '13px' }}>
-                    This takes 20–40 seconds — we're analyzing multiple pages for deeper insight
-                  </p>
+                <div style={s.loadingBox}>
+                  <div style={{ ...s.spinner, borderTopColor: '#0d9488' }} />
+                  <p style={s.loadingText}>Crawling subpages — this takes 20–40 seconds…</p>
                 </div>
               )}
 
-              {deepError && <div style={s.errorCard}>⚠️ &nbsp;{deepError}</div>}
+              {deepError && <div style={s.errorBox}>⚠️ {deepError}</div>}
 
               {deepAssessment && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={s.deepSections}>
 
-                  {/* Source Audit */}
-                  <div style={{ ...s.deepCard, borderLeftColor: '#94a3b8' }}>
-                    <h3 style={{ ...s.deepSectionTitle, color: '#475569' }}>
-                      🔍 Source Audit &amp; Research Transparency
-                    </h3>
+                  <div style={s.deepBlock}>
+                    <div style={s.deepBlockLabel}>🔍 Source Audit</div>
                     <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {deepAssessment.sourceAudit}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.sourceAudit}</ReactMarkdown>
                     </div>
                   </div>
 
-                  {/* Full 5-Row Table */}
-                  <div style={{ ...s.deepCard, borderLeftColor: '#4fc3f7' }}>
-                    <h3 style={{ ...s.deepSectionTitle, color: '#0e7490' }}>
-                      📊 Executive Impact Table — Top 5 Capabilities
-                    </h3>
-                    <div className="md-content" style={{ overflowX: 'auto' }}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {deepAssessment.fullTable}
-                      </ReactMarkdown>
+                  <div style={s.deepBlock}>
+                    <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
+                    <div className="md-content table-wrap">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.fullTable}</ReactMarkdown>
                     </div>
                   </div>
 
-                  {/* Refined Top 3 */}
-                  <div style={{ ...s.deepCard, borderLeftColor: '#34d399', backgroundColor: '#f0fdf4' }}>
-                    <h3 style={{ ...s.deepSectionTitle, color: '#065f46' }}>
-                      🏆 Refined Top 3 — Most Compelling Capabilities
-                    </h3>
-                    <div className="md-content" style={{ overflowX: 'auto' }}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {deepAssessment.refinedTable}
-                      </ReactMarkdown>
+                  <div style={{ ...s.deepBlock, backgroundColor: '#f0fdf9', borderColor: '#99f6e4' }}>
+                    <div style={{ ...s.deepBlockLabel, color: '#0d9488' }}>🏆 Refined Top 3 Capabilities</div>
+                    <div className="md-content table-wrap">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.refinedTable}</ReactMarkdown>
                     </div>
                   </div>
 
-                  {/* Persona Objections */}
-                  <div style={{ ...s.deepCard, borderLeftColor: '#a78bfa' }}>
-                    <h3 style={{ ...s.deepSectionTitle, color: '#5b21b6' }}>
-                      🗣️ Persona Objection Responses
-                    </h3>
-                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '16px', marginTop: '-4px' }}>
-                      CEO · CRO · CFO — top objections with sharp, confident responses
-                    </p>
+                  <div style={s.deepBlock}>
+                    <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
+                    <p style={s.deepNote}>Anticipating the top objections from CEO, CRO, and CFO — with sharp, confident responses.</p>
                     <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {deepAssessment.personaObjections}
-                      </ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.personaObjections}</ReactMarkdown>
                     </div>
                   </div>
 
@@ -328,30 +304,24 @@ export default function Home() {
             </div>
           )}
 
-          {/* Share + Run Another */}
+          {/* ── ACTIONS ── */}
           {assessment && !loading && (
-            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <div style={s.actionsWrap}>
 
-              {/* Share link display box — shown once saved */}
               {shareId && (shareStatus === 'ready' || shareStatus === 'copied') && (
                 <div style={s.shareLinkBox}>
                   <p style={s.shareLinkLabel}>
-                    {shareStatus === 'copied' ? '✅ Link copied to clipboard!' : '🔗 Your shareable link:'}
+                    {shareStatus === 'copied' ? '✅ Copied to clipboard!' : '🔗 Shareable link'}
                   </p>
                   <div style={s.shareLinkRow}>
-                    <input
-                      readOnly
-                      value={shareId}
-                      onFocus={e => e.target.select()}
-                      style={s.shareLinkInput}
-                    />
+                    <input readOnly value={shareId} onFocus={e => e.target.select()} style={s.shareLinkInput} />
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(shareId).catch(() => {});
                         setShareStatus('copied');
                         setTimeout(() => setShareStatus('ready'), 2000);
                       }}
-                      style={{ ...s.button, backgroundColor: '#4fc3f7', color: '#1a1a2e', whiteSpace: 'nowrap' }}
+                      style={s.copyBtn}
                     >
                       Copy
                     </button>
@@ -359,38 +329,28 @@ export default function Home() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {/* Show Share button only if not yet saved */}
+              {shareStatus === 'error' && (
+                <p style={{ color: '#b91c1c', fontSize: '13px', textAlign: 'center' }}>
+                  ⚠️ {shareError || 'Could not save report — please try again.'}
+                </p>
+              )}
+
+              <div style={s.actionBtns}>
                 {!shareId && (
                   <button
                     onClick={handleShare}
                     disabled={shareStatus === 'saving'}
                     style={{
-                      ...s.button,
-                      backgroundColor: '#4fc3f7',
-                      color: '#1a1a2e',
-                      minWidth: '200px',
-                      opacity: shareStatus === 'saving' ? 0.7 : 1,
+                      ...s.btn,
+                      backgroundColor: '#0d9488',
+                      opacity: shareStatus === 'saving' ? 0.6 : 1,
                       cursor: shareStatus === 'saving' ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {shareStatus === 'saving' ? '⏳ Saving…' : '🔗 Generate Share Link'}
+                    {shareStatus === 'saving' ? 'Saving…' : '🔗 Generate Share Link'}
                   </button>
                 )}
-                {shareStatus === 'error' && (
-                  <p style={{ color: '#c53030', fontSize: '14px', margin: 0 }}>
-                    ⚠️ Could not save report — please try again.
-                  </p>
-                )}
-                <button
-                  onClick={handleReset}
-                  style={{
-                    ...s.button,
-                    backgroundColor: '#fff',
-                    color: '#1a1a2e',
-                    border: '2px solid #1a1a2e',
-                  }}
-                >
+                <button onClick={handleReset} style={s.btnOutline}>
                   ↑ Run Another Assessment
                 </button>
               </div>
@@ -402,248 +362,315 @@ export default function Home() {
 
         {/* ── FOOTER ── */}
         <footer style={s.footer}>
-          <p style={{ marginBottom: '8px' }}>
-            <strong>PricingWire</strong> helps technology innovators discover, communicate and monetize their most compelling value advantages.
+          <p style={s.footerLogo}>PricingWire</p>
+          <p style={s.footerText}>
+            Helping technology innovators discover, communicate, and monetize their most compelling value advantages.
           </p>
-          <p style={{ opacity: 0.6, fontSize: '13px' }}>
-            Your <strong>Most Compelling Value (MCV)</strong> is the fastest path to revenue growth and retention.
-          </p>
+          <p style={s.footerMcv}>Your Most Compelling Value (MCV) is the fastest path to revenue growth and retention.</p>
         </footer>
+
       </div>
 
       <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up { animation: fadeUp 0.4s ease forwards; }
+
+        /* ── Markdown styles ── */
+        .md-content p {
+          font-size: 14px; line-height: 1.75; color: #374151;
+          margin-bottom: 12px;
+        }
+        .md-content p:last-child { margin-bottom: 0; }
+
+        .md-content ul { padding-left: 20px; margin-bottom: 12px; }
+        .md-content li {
+          font-size: 14px; line-height: 1.7; color: #374151;
+          margin-bottom: 8px;
+        }
+
+        .md-content strong { color: #111827; font-weight: 600; }
+
+        .md-content h3, .md-content h4 {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 15px; font-weight: 600;
+          color: #111827; margin: 20px 0 8px;
+        }
+        .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
+
+        /* ── Table styles ── */
+        .table-wrap { overflow-x: auto; }
 
         .md-content table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 13px;
-          margin-top: 8px;
+          width: 100%; border-collapse: collapse;
+          font-size: 13px; margin-top: 4px;
         }
         .md-content th {
-          background: #1a1a2e;
-          color: white;
-          padding: 10px 14px;
-          text-align: left;
-          font-size: 12px;
-          font-weight: 700;
+          background: #111827; color: #fff;
+          padding: 10px 14px; text-align: left;
+          font-size: 11px; font-weight: 600;
+          letter-spacing: 0.5px; text-transform: uppercase;
         }
+        .md-content th strong { color: #fff; font-weight: 600; }
         .md-content td {
-          padding: 10px 14px;
-          border-bottom: 1px solid #e2e8f0;
-          vertical-align: top;
-          line-height: 1.55;
-          color: #334155;
-          font-size: 13px;
+          padding: 12px 14px; border-bottom: 1px solid #f3f4f6;
+          vertical-align: top; line-height: 1.6; color: #374151;
         }
-        .md-content tr:nth-child(even) td { background: #f8fafc; }
-        .md-content tr:hover td { background: #f1f5f9; }
-        .md-content ul { padding-left: 18px; margin: 4px 0; }
-        .md-content li { margin-bottom: 8px; line-height: 1.6; color: #334155; font-size: 14px; }
-        .md-content p { margin: 0 0 10px; line-height: 1.65; color: #334155; font-size: 14px; }
-        .md-content strong { color: #1a1a2e; }
-        .md-content th strong { color: white; }
-        .md-content h3, .md-content h4 { margin: 18px 0 8px; color: #1a1a2e; }
+        .md-content tr:last-child td { border-bottom: none; }
+        .md-content tr:nth-child(even) td { background: #fafafa; }
+        .md-content tr:hover td { background: #f0fdf9; }
 
-        @media (max-width: 640px) {
-          .grid-2col { grid-template-columns: 1fr !important; }
+        @media (max-width: 680px) {
+          .grid-2 { grid-template-columns: 1fr !important; }
           .input-row { flex-direction: column !important; }
-          .advanced-grid { grid-template-columns: 1fr !important; }
+          .adv-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>
   );
 }
 
-// ── Styles ───────────────────────────────────────────────────────────────────
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const font = "'DM Sans', -apple-system, sans-serif";
+const serif = "'DM Serif Display', Georgia, serif";
+const teal = '#0d9488';
+const ink = '#111827';
+const body = '#374151';
+const muted = '#6b7280';
+const border = '#e5e7eb';
+const bg = '#ffffff';
+const bgSoft = '#f9fafb';
+
 const s = {
   page: {
-    minHeight: '100vh',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif',
-    color: '#1a1a2e',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#f8f9fa',
+    minHeight: '100vh', fontFamily: font, color: ink,
+    backgroundColor: bg, display: 'flex', flexDirection: 'column',
   },
-  header: {
-    backgroundColor: '#1a1a2e',
-    color: 'white',
-    padding: '64px 24px 56px',
-    textAlign: 'center',
+
+  // Nav
+  nav: {
+    borderBottom: `1px solid ${border}`,
+    padding: '16px 40px', display: 'flex',
+    alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: bg,
   },
-  logoLabel: {
-    fontSize: '12px',
-    fontWeight: '800',
-    letterSpacing: '4px',
-    textTransform: 'uppercase',
-    color: '#4fc3f7',
-    marginBottom: '20px',
+  navLogo: {
+    fontSize: '15px', fontWeight: '700', color: ink, letterSpacing: '-0.3px',
+  },
+  navTagline: {
+    fontSize: '12px', color: muted, letterSpacing: '0.5px',
+  },
+
+  // Hero
+  hero: {
+    padding: '80px 40px 64px', textAlign: 'center',
+    borderBottom: `1px solid ${border}`, backgroundColor: bg,
+  },
+  heroEyebrow: {
+    fontSize: '11px', fontWeight: '600', letterSpacing: '2px',
+    textTransform: 'uppercase', color: teal, marginBottom: '20px',
   },
   heroTitle: {
-    fontSize: 'clamp(28px, 5vw, 48px)',
-    fontWeight: '800',
-    letterSpacing: '-1px',
-    margin: '0 0 16px',
+    fontFamily: serif, fontSize: 'clamp(36px, 5vw, 60px)',
+    fontWeight: '400', color: ink, lineHeight: '1.15',
+    marginBottom: '20px', letterSpacing: '-0.5px',
   },
   heroSub: {
-    fontSize: '17px',
-    opacity: 0.8,
-    maxWidth: '540px',
-    margin: '0 auto',
-    lineHeight: '1.7',
+    fontSize: '16px', color: body, lineHeight: '1.75',
+    maxWidth: '480px', margin: '0 auto',
   },
+
+  // Main
   main: {
-    maxWidth: '960px',
-    margin: '0 auto',
-    padding: '40px 20px 60px',
-    width: '100%',
-    flex: 1,
+    maxWidth: '880px', margin: '0 auto',
+    padding: '48px 24px 80px', width: '100%', flex: 1,
   },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '14px',
-    padding: '32px',
-    boxShadow: '0 2px 24px rgba(0,0,0,0.08)',
-    marginBottom: '24px',
+
+  // Input card
+  inputCard: {
+    border: `1px solid ${border}`, borderRadius: '12px',
+    padding: '32px', backgroundColor: bg,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '32px',
   },
   label: {
-    display: 'block',
-    fontWeight: '600',
-    fontSize: '14px',
-    marginBottom: '8px',
-    color: '#333',
+    display: 'block', fontSize: '13px', fontWeight: '600',
+    color: ink, marginBottom: '8px',
   },
-  optional: { fontWeight: '400', color: '#999', fontSize: '13px' },
-  inputRow: { display: 'flex', gap: '12px', marginBottom: '16px' },
+  optional: { fontWeight: '400', color: muted },
+  inputRow: { display: 'flex', gap: '10px', marginBottom: '16px' },
   input: {
-    flex: 1,
-    padding: '11px 14px',
-    fontSize: '15px',
-    border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    outline: 'none',
-    fontFamily: 'inherit',
-    color: '#1a1a2e',
-    minWidth: 0,
-    backgroundColor: 'white',
+    flex: 1, padding: '10px 14px', fontSize: '14px',
+    border: `1px solid ${border}`, borderRadius: '8px',
+    fontFamily: font, color: ink, backgroundColor: bg,
+    outline: 'none', minWidth: 0,
   },
-  button: {
-    padding: '11px 26px',
-    backgroundColor: '#1a1a2e',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '15px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    fontFamily: 'inherit',
+  btn: {
+    padding: '10px 22px', backgroundColor: ink, color: '#fff',
+    border: 'none', borderRadius: '8px', fontSize: '14px',
+    fontWeight: '600', cursor: 'pointer', fontFamily: font,
+    whiteSpace: 'nowrap', letterSpacing: '-0.2px',
   },
-  advancedToggle: {
-    background: 'none',
-    border: 'none',
-    color: '#4fc3f7',
-    fontSize: '13px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    padding: '4px 0',
-    marginBottom: '16px',
-    fontFamily: 'inherit',
+  btnOutline: {
+    padding: '10px 22px', backgroundColor: bg, color: ink,
+    border: `1px solid ${border}`, borderRadius: '8px', fontSize: '14px',
+    fontWeight: '500', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap',
   },
-  advancedGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
-    borderTop: '1px solid #f0f0f0',
-    paddingTop: '20px',
-    marginBottom: '8px',
+  advToggle: {
+    background: 'none', border: 'none', fontSize: '12px',
+    color: muted, cursor: 'pointer', fontFamily: font,
+    padding: '0 0 16px', fontWeight: '500',
   },
-  disclaimer: { fontSize: '11px', color: '#aaa', marginTop: '16px' },
+  advGrid: {
+    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
+    paddingTop: '16px', borderTop: `1px solid ${border}`, marginBottom: '4px',
+  },
+  disclaimer: { fontSize: '11px', color: muted, marginTop: '16px' },
+
+  // Loading
+  loadingBox: {
+    textAlign: 'center', padding: '40px 24px',
+    border: `1px solid ${border}`, borderRadius: '12px',
+    backgroundColor: bgSoft, marginBottom: '24px',
+  },
   spinner: {
-    width: '36px', height: '36px',
-    border: '3px solid #e2e8f0', borderTopColor: '#4fc3f7',
-    borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto',
+    width: '28px', height: '28px',
+    border: `2px solid ${border}`, borderTopColor: ink,
+    borderRadius: '50%', animation: 'spin 0.7s linear infinite',
+    margin: '0 auto',
   },
-  spinnerDeep: {
-    width: '36px', height: '36px',
-    border: '3px solid #e2e8f0', borderTopColor: '#a78bfa',
-    borderRadius: '50%', animation: 'spin 0.9s linear infinite', margin: '0 auto',
+  loadingText: { fontSize: '14px', color: muted, marginTop: '12px' },
+
+  // Error
+  errorBox: {
+    backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+    borderRadius: '8px', padding: '14px 18px',
+    color: '#b91c1c', fontSize: '13px', marginBottom: '24px',
   },
-  errorCard: {
-    backgroundColor: '#fff5f5', border: '1px solid #feb2b2',
-    borderRadius: '10px', padding: '16px 20px',
-    color: '#c53030', fontSize: '14px', marginBottom: '24px',
+
+  // Results
+  resultsWrap: {
+    border: `1px solid ${border}`, borderRadius: '12px',
+    backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+    marginBottom: '24px', overflow: 'hidden',
+    animation: 'fadeUp 0.4s ease forwards',
   },
-  results: { display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '8px' },
-  resultHeader: {
-    backgroundColor: '#1a1a2e', color: 'white',
-    borderRadius: '14px', padding: '36px 32px', textAlign: 'center',
+  companyBlock: {
+    padding: '36px 36px 28px', borderBottom: `1px solid ${border}`,
   },
-  companyName: { fontSize: '28px', fontWeight: '800', marginBottom: '12px' },
-  overviewText: {
-    opacity: 0.75, lineHeight: '1.7', fontSize: '15px',
-    marginBottom: '20px', maxWidth: '640px', margin: '0 auto 20px',
+  companyName: {
+    fontSize: '26px', fontWeight: '700', color: ink,
+    marginBottom: '12px', letterSpacing: '-0.5px',
   },
-  valueLine: {
-    fontSize: 'clamp(16px, 2.5vw, 21px)',
-    fontWeight: '700', fontStyle: 'italic', color: '#4fc3f7', lineHeight: '1.5',
+  valueHeadline: {
+    fontFamily: serif, fontSize: 'clamp(17px, 2.5vw, 22px)',
+    fontStyle: 'italic', color: teal, lineHeight: '1.5',
+    marginBottom: '14px',
   },
-  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' },
-  resultCard: {
-    backgroundColor: 'white', borderRadius: '14px', padding: '24px',
-    boxShadow: '0 2px 20px rgba(0,0,0,0.07)', borderTop: '4px solid #ccc',
+  companyOverview: {
+    fontSize: '14px', color: body, lineHeight: '1.75',
   },
-  sectionTitle: { fontSize: '15px', fontWeight: '700', marginBottom: '14px', marginTop: 0 },
-  bodyText: { fontSize: '14px', lineHeight: '1.7', color: '#444', margin: 0 },
-  list: { paddingLeft: '18px', margin: 0 },
-  listItem: { fontSize: '14px', lineHeight: '1.6', color: '#444', marginBottom: '10px' },
-  deepSection: { marginTop: '12px' },
-  deepDivider: { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px', marginTop: '12px' },
-  deepDividerLine: { flex: 1, height: '1px', backgroundColor: '#e2e8f0' },
-  deepDividerLabel: {
-    fontSize: '13px', fontWeight: '700', color: '#64748b',
-    whiteSpace: 'nowrap', letterSpacing: '0.5px', textTransform: 'uppercase',
+  divider: { height: '1px', backgroundColor: border },
+  grid2: {
+    display: 'grid', gridTemplateColumns: '1fr 1fr',
   },
-  deepCard: {
-    backgroundColor: 'white', borderRadius: '14px', padding: '28px 32px',
-    boxShadow: '0 2px 20px rgba(0,0,0,0.07)',
-    borderLeft: '4px solid #ccc',
+  block: {
+    padding: '28px 32px',
+    borderRight: `1px solid ${border}`,
   },
-  deepSectionTitle: { fontSize: '16px', fontWeight: '700', marginBottom: '16px', marginTop: 0 },
-  footer: {
-    backgroundColor: '#1a1a2e', color: 'white',
-    padding: '40px 24px', textAlign: 'center', lineHeight: '1.8', fontSize: '14px',
+  blockLabel: {
+    fontSize: '11px', fontWeight: '700', letterSpacing: '1px',
+    textTransform: 'uppercase', color: muted, marginBottom: '12px',
+  },
+  blockText: {
+    fontSize: '14px', lineHeight: '1.75', color: body,
+  },
+  ul: { paddingLeft: '18px', margin: 0 },
+  li: {
+    fontSize: '14px', lineHeight: '1.7', color: body,
+    marginBottom: '10px',
+  },
+
+  // Deep dive
+  deepWrap: {
+    border: `1px solid ${border}`, borderRadius: '12px',
+    backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+    marginBottom: '24px', overflow: 'hidden',
+    animation: 'fadeUp 0.4s ease forwards',
+  },
+  deepHeader: {
+    padding: '24px 32px', borderBottom: `1px solid ${border}`,
+    backgroundColor: bgSoft, display: 'flex',
+    alignItems: 'center', gap: '16px', flexWrap: 'wrap',
+  },
+  deepPill: {
+    fontSize: '11px', fontWeight: '700', letterSpacing: '1.5px',
+    textTransform: 'uppercase', color: teal,
+    backgroundColor: '#f0fdf9', border: '1px solid #99f6e4',
+    borderRadius: '20px', padding: '4px 12px',
+  },
+  deepSubtitle: { fontSize: '12px', color: muted },
+  deepSections: { display: 'flex', flexDirection: 'column' },
+  deepBlock: {
+    padding: '28px 32px', borderBottom: `1px solid ${border}`,
+    backgroundColor: bg,
+  },
+  deepBlockLabel: {
+    fontSize: '12px', fontWeight: '700', letterSpacing: '0.8px',
+    textTransform: 'uppercase', color: ink, marginBottom: '16px',
+  },
+  deepNote: {
+    fontSize: '13px', color: muted, marginBottom: '16px',
+    fontStyle: 'italic', lineHeight: '1.6',
+  },
+
+  // Actions
+  actionsWrap: {
+    display: 'flex', flexDirection: 'column',
+    alignItems: 'center', gap: '16px', marginTop: '8px',
   },
   shareLinkBox: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '20px 24px',
-    boxShadow: '0 2px 20px rgba(0,0,0,0.08)',
-    width: '100%',
-    maxWidth: '600px',
-    border: '2px solid #34d399',
+    width: '100%', maxWidth: '560px',
+    border: `1px solid #99f6e4`, borderRadius: '10px',
+    padding: '18px 20px', backgroundColor: '#f0fdf9',
   },
   shareLinkLabel: {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#065f46',
+    fontSize: '13px', fontWeight: '600', color: '#0f766e',
     marginBottom: '10px',
-    marginTop: 0,
   },
-  shareLinkRow: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-  },
+  shareLinkRow: { display: 'flex', gap: '8px', alignItems: 'center' },
   shareLinkInput: {
-    flex: 1,
-    padding: '9px 12px',
-    fontSize: '13px',
-    border: '1px solid #e2e8f0',
-    borderRadius: '6px',
-    fontFamily: 'monospace',
-    color: '#334155',
-    backgroundColor: '#f8fafc',
-    minWidth: 0,
+    flex: 1, padding: '8px 12px', fontSize: '12px',
+    border: `1px solid ${border}`, borderRadius: '6px',
+    fontFamily: 'monospace', color: body,
+    backgroundColor: bg, minWidth: 0,
+  },
+  copyBtn: {
+    padding: '8px 16px', backgroundColor: teal, color: '#fff',
+    border: 'none', borderRadius: '6px', fontSize: '13px',
+    fontWeight: '600', cursor: 'pointer', fontFamily: font,
+  },
+  actionBtns: {
+    display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center',
+  },
+
+  // Footer
+  footer: {
+    borderTop: `1px solid ${border}`, padding: '40px 40px',
+    textAlign: 'center', backgroundColor: bgSoft,
+  },
+  footerLogo: {
+    fontSize: '14px', fontWeight: '700', color: ink, marginBottom: '8px',
+  },
+  footerText: {
+    fontSize: '13px', color: muted, lineHeight: '1.7', marginBottom: '6px',
+  },
+  footerMcv: {
+    fontSize: '12px', color: muted, fontStyle: 'italic',
   },
 };
