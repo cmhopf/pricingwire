@@ -356,6 +356,7 @@ export default function Home() {
         .md-content li { margin-bottom: 8px; line-height: 1.6; color: #334155; font-size: 14px; }
         .md-content p { margin: 0 0 10px; line-height: 1.65; color: #334155; font-size: 14px; }
         .md-content strong { color: #1a1a2e; }
+        .md-content th strong { color: white; }
         .md-content h3, .md-content h4 { margin: 18px 0 8px; color: #1a1a2e; }
 
         @media (max-width: 640px) {
