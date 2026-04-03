@@ -14,6 +14,8 @@ export default function Home() {
   const [deepAssessment, setDeepAssessment] = useState(null);
   const [error, setError] = useState('');
   const [deepError, setDeepError] = useState('');
+  const [shareId, setShareId] = useState(null);
+  const [shareStatus, setShareStatus] = useState('idle'); // idle | saving | copied | error
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +25,8 @@ export default function Home() {
     setDeepError('');
     setAssessment(null);
     setDeepAssessment(null);
+    setShareId(null);
+    setShareStatus('idle');
 
     // Both calls fire in parallel — quick one surfaces first
     const quickPromise = fetch('/api/assess', {
@@ -59,8 +63,32 @@ export default function Home() {
   const handleReset = () => {
     setAssessment(null);
     setDeepAssessment(null);
+    setShareId(null);
+    setShareStatus('idle');
     setUrl('');
     window.scrollTo(0, 0);
+  };
+
+  const handleShare = async () => {
+    setShareStatus('saving');
+    try {
+      const response = await fetch('/api/save-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assessment, deepAssessment, url }),
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      const shareUrl = `${window.location.origin}/report/${data.id}`;
+      setShareId(data.id);
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatus('copied');
+      setTimeout(() => setShareStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Share error:', err);
+      setShareStatus('error');
+      setTimeout(() => setShareStatus('idle'), 3000);
+    }
   };
 
   const showDeepSection = deepLoading || deepAssessment || deepError;
@@ -295,9 +323,26 @@ export default function Home() {
             </div>
           )}
 
-          {/* Run Another */}
+          {/* Share + Run Another */}
           {assessment && !loading && (
-            <div style={{ textAlign: 'center', marginTop: '32px' }}>
+            <div style={{ textAlign: 'center', marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleShare}
+                disabled={shareStatus === 'saving'}
+                style={{
+                  ...s.button,
+                  backgroundColor: shareStatus === 'copied' ? '#34d399' : shareStatus === 'error' ? '#f87171' : '#4fc3f7',
+                  color: '#1a1a2e',
+                  minWidth: '200px',
+                  opacity: shareStatus === 'saving' ? 0.7 : 1,
+                  cursor: shareStatus === 'saving' ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {shareStatus === 'saving' && '⏳ Saving…'}
+                {shareStatus === 'copied' && '✅ Link Copied!'}
+                {shareStatus === 'error' && '⚠️ Error — Try Again'}
+                {shareStatus === 'idle' && '🔗 Copy Share Link'}
+              </button>
               <button
                 onClick={handleReset}
                 style={{
