@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Generate a short random ID
     const id = Math.random().toString(36).substring(2, 10);
 
     const data = {
@@ -23,15 +22,23 @@ export default async function handler(req, res) {
       createdAt: new Date().toISOString(),
     };
 
-    await put(`reports/${id}.json`, JSON.stringify(data), {
+    const jsonString = JSON.stringify(data);
+    const buffer = Buffer.from(jsonString, 'utf-8');
+
+    const { url: blobUrl } = await put(`reports/${id}.json`, buffer, {
       access: 'public',
       contentType: 'application/json',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
+    console.log('Report saved:', blobUrl);
     return res.status(200).json({ id });
 
   } catch (err) {
     console.error('Save report error:', err);
-    return res.status(500).json({ error: 'Could not save report. Please try again.' });
+    // Return the actual error message so we can diagnose it
+    return res.status(500).json({
+      error: `Save failed: ${err.message || 'Unknown error'}`,
+    });
   }
 }
