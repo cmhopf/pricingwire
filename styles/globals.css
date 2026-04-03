@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+  .input-row {
+    flex-direction: column !important;
+  }
+  .advanced-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
