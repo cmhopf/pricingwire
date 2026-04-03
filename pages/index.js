@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -7,35 +9,61 @@ export default function Home() {
   const [tone, setTone] = useState('Professional and persuasive');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deepLoading, setDeepLoading] = useState(false);
   const [assessment, setAssessment] = useState(null);
+  const [deepAssessment, setDeepAssessment] = useState(null);
   const [error, setError] = useState('');
+  const [deepError, setDeepError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setDeepLoading(true);
     setError('');
+    setDeepError('');
     setAssessment(null);
+    setDeepAssessment(null);
 
-    try {
-      const response = await fetch('/api/assess', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, targetAudience, tone }),
-      });
+    // Both calls fire in parallel — quick one surfaces first
+    const quickPromise = fetch('/api/assess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, targetAudience, tone }),
+    });
 
-      const data = await response.json();
+    const deepPromise = fetch('/api/deep-assess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong. Please try again.');
-      }
+    quickPromise
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setAssessment(data);
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
 
-      setAssessment(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    deepPromise
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setDeepAssessment(data);
+      })
+      .catch(err => setDeepError(err.message))
+      .finally(() => setDeepLoading(false));
   };
+
+  const handleReset = () => {
+    setAssessment(null);
+    setDeepAssessment(null);
+    setUrl('');
+    window.scrollTo(0, 0);
+  };
+
+  const showDeepSection = deepLoading || deepAssessment || deepError;
 
   return (
     <>
@@ -66,7 +94,6 @@ export default function Home() {
           <div style={s.card}>
             <form onSubmit={handleSubmit}>
               <label style={s.label}>Enter your company's website:</label>
-
               <div className="input-row" style={s.inputRow}>
                 <input
                   type="url"
@@ -78,14 +105,17 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  disabled={loading}
-                  style={{ ...s.button, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                  disabled={loading || deepLoading}
+                  style={{
+                    ...s.button,
+                    opacity: (loading || deepLoading) ? 0.7 : 1,
+                    cursor: (loading || deepLoading) ? 'not-allowed' : 'pointer',
+                  }}
                 >
                   {loading ? '⏳ Analyzing…' : 'Generate Assessment'}
                 </button>
               </div>
 
-              {/* Advanced Toggle */}
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
@@ -97,7 +127,9 @@ export default function Home() {
               {showAdvanced && (
                 <div className="advanced-grid" style={s.advancedGrid}>
                   <div>
-                    <label style={s.label}>Target Audience <span style={s.optional}>(optional)</span></label>
+                    <label style={s.label}>
+                      Target Audience <span style={s.optional}>(optional)</span>
+                    </label>
                     <input
                       type="text"
                       value={targetAudience}
@@ -128,35 +160,27 @@ export default function Home() {
             </form>
           </div>
 
-          {/* Loading State */}
+          {/* Quick Assessment Loading */}
           {loading && (
             <div style={{ ...s.card, textAlign: 'center', padding: '48px 32px' }}>
               <div style={s.spinner} />
               <p style={{ color: '#555', marginTop: '16px', fontSize: '15px' }}>
-                Analyzing website and generating your Value Impact Assessment…
+                Generating your Value Impact Assessment…
               </p>
             </div>
           )}
 
-          {/* Error State */}
-          {error && (
-            <div style={s.errorCard}>
-              ⚠️ &nbsp;{error}
-            </div>
-          )}
+          {error && <div style={s.errorCard}>⚠️ &nbsp;{error}</div>}
 
-          {/* Results */}
+          {/* ── QUICK ASSESSMENT RESULTS ── */}
           {assessment && (
             <div style={s.results}>
-
-              {/* Result Header */}
               <div style={s.resultHeader}>
                 <div style={s.companyName}>{assessment.companyName}</div>
                 <p style={s.overviewText}>{assessment.companyOverview}</p>
                 <div style={s.valueLine}>"{assessment.valueHeadline}"</div>
               </div>
 
-              {/* MCV + Target Buyer */}
               <div className="grid-2col" style={s.grid}>
                 <div style={{ ...s.resultCard, borderTopColor: '#4fc3f7' }}>
                   <h3 style={s.sectionTitle}>⭐ Most Compelling Value</h3>
@@ -168,7 +192,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Why Buy + Why Now */}
               <div className="grid-2col" style={s.grid}>
                 <div style={{ ...s.resultCard, borderTopColor: '#34d399' }}>
                   <h3 style={s.sectionTitle}>✅ Why Buy?</h3>
@@ -187,19 +210,108 @@ export default function Home() {
                   </ul>
                 </div>
               </div>
-
-              {/* Run Another */}
-              <div style={{ textAlign: 'center' }}>
-                <button
-                  onClick={() => { setAssessment(null); setUrl(''); window.scrollTo(0, 0); }}
-                  style={{ ...s.button, backgroundColor: '#fff', color: '#1a1a2e', border: '2px solid #1a1a2e' }}
-                >
-                  ↑ Run Another Assessment
-                </button>
-              </div>
-
             </div>
           )}
+
+          {/* ── EXECUTIVE DEEP-DIVE SECTION ── */}
+          {showDeepSection && (
+            <div style={s.deepSection}>
+              <div style={s.deepDivider}>
+                <div style={s.deepDividerLine} />
+                <div style={s.deepDividerLabel}>⚡ Executive Deep-Dive Analysis</div>
+                <div style={s.deepDividerLine} />
+              </div>
+
+              {deepLoading && (
+                <div style={{ ...s.card, textAlign: 'center', padding: '48px 32px' }}>
+                  <div style={s.spinnerDeep} />
+                  <p style={{ color: '#555', marginTop: '16px', fontSize: '15px' }}>
+                    Crawling subpages and building executive analysis…
+                  </p>
+                  <p style={{ color: '#aaa', marginTop: '8px', fontSize: '13px' }}>
+                    This takes 20–40 seconds — we're analyzing multiple pages for deeper insight
+                  </p>
+                </div>
+              )}
+
+              {deepError && <div style={s.errorCard}>⚠️ &nbsp;{deepError}</div>}
+
+              {deepAssessment && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                  {/* Source Audit */}
+                  <div style={{ ...s.deepCard, borderLeftColor: '#94a3b8' }}>
+                    <h3 style={{ ...s.deepSectionTitle, color: '#475569' }}>
+                      🔍 Source Audit &amp; Research Transparency
+                    </h3>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {deepAssessment.sourceAudit}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {/* Full 5-Row Table */}
+                  <div style={{ ...s.deepCard, borderLeftColor: '#4fc3f7' }}>
+                    <h3 style={{ ...s.deepSectionTitle, color: '#0e7490' }}>
+                      📊 Executive Impact Table — Top 5 Capabilities
+                    </h3>
+                    <div className="md-content" style={{ overflowX: 'auto' }}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {deepAssessment.fullTable}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {/* Refined Top 3 */}
+                  <div style={{ ...s.deepCard, borderLeftColor: '#34d399', backgroundColor: '#f0fdf4' }}>
+                    <h3 style={{ ...s.deepSectionTitle, color: '#065f46' }}>
+                      🏆 Refined Top 3 — Most Compelling Capabilities
+                    </h3>
+                    <div className="md-content" style={{ overflowX: 'auto' }}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {deepAssessment.refinedTable}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {/* Persona Objections */}
+                  <div style={{ ...s.deepCard, borderLeftColor: '#a78bfa' }}>
+                    <h3 style={{ ...s.deepSectionTitle, color: '#5b21b6' }}>
+                      🗣️ Persona Objection Responses
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#888', marginBottom: '16px', marginTop: '-4px' }}>
+                      CEO · CRO · CFO — top objections with sharp, confident responses
+                    </p>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {deepAssessment.personaObjections}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Run Another */}
+          {assessment && !loading && (
+            <div style={{ textAlign: 'center', marginTop: '32px' }}>
+              <button
+                onClick={handleReset}
+                style={{
+                  ...s.button,
+                  backgroundColor: '#fff',
+                  color: '#1a1a2e',
+                  border: '2px solid #1a1a2e',
+                }}
+              >
+                ↑ Run Another Assessment
+              </button>
+            </div>
+          )}
+
         </main>
 
         {/* ── FOOTER ── */}
@@ -211,19 +323,52 @@ export default function Home() {
             Your <strong>Most Compelling Value (MCV)</strong> is the fastest path to revenue growth and retention.
           </p>
         </footer>
-
       </div>
 
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .md-content table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+          margin-top: 8px;
+        }
+        .md-content th {
+          background: #1a1a2e;
+          color: white;
+          padding: 10px 14px;
+          text-align: left;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .md-content td {
+          padding: 10px 14px;
+          border-bottom: 1px solid #e2e8f0;
+          vertical-align: top;
+          line-height: 1.55;
+          color: #334155;
+          font-size: 13px;
+        }
+        .md-content tr:nth-child(even) td { background: #f8fafc; }
+        .md-content tr:hover td { background: #f1f5f9; }
+        .md-content ul { padding-left: 18px; margin: 4px 0; }
+        .md-content li { margin-bottom: 8px; line-height: 1.6; color: #334155; font-size: 14px; }
+        .md-content p { margin: 0 0 10px; line-height: 1.65; color: #334155; font-size: 14px; }
+        .md-content strong { color: #1a1a2e; }
+        .md-content h3, .md-content h4 { margin: 18px 0 8px; color: #1a1a2e; }
+
+        @media (max-width: 640px) {
+          .grid-2col { grid-template-columns: 1fr !important; }
+          .input-row { flex-direction: column !important; }
+          .advanced-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>
   );
 }
 
-// ── Styles ──────────────────────────────────────────────
+// ── Styles ───────────────────────────────────────────────────────────────────
 const s = {
   page: {
     minHeight: '100vh',
@@ -231,6 +376,7 @@ const s = {
     color: '#1a1a2e',
     display: 'flex',
     flexDirection: 'column',
+    backgroundColor: '#f8f9fa',
   },
   header: {
     backgroundColor: '#1a1a2e',
@@ -260,7 +406,7 @@ const s = {
     lineHeight: '1.7',
   },
   main: {
-    maxWidth: '900px',
+    maxWidth: '960px',
     margin: '0 auto',
     padding: '40px 20px 60px',
     width: '100%',
@@ -280,16 +426,8 @@ const s = {
     marginBottom: '8px',
     color: '#333',
   },
-  optional: {
-    fontWeight: '400',
-    color: '#999',
-    fontSize: '13px',
-  },
-  inputRow: {
-    display: 'flex',
-    gap: '12px',
-    marginBottom: '16px',
-  },
+  optional: { fontWeight: '400', color: '#999', fontSize: '13px' },
+  inputRow: { display: 'flex', gap: '12px', marginBottom: '16px' },
   input: {
     flex: 1,
     padding: '11px 14px',
@@ -300,6 +438,7 @@ const s = {
     fontFamily: 'inherit',
     color: '#1a1a2e',
     minWidth: 0,
+    backgroundColor: 'white',
   },
   button: {
     padding: '11px 26px',
@@ -312,7 +451,6 @@ const s = {
     cursor: 'pointer',
     whiteSpace: 'nowrap',
     fontFamily: 'inherit',
-    transition: 'opacity 0.2s',
   },
   advancedToggle: {
     background: 'none',
@@ -333,101 +471,60 @@ const s = {
     paddingTop: '20px',
     marginBottom: '8px',
   },
-  disclaimer: {
-    fontSize: '11px',
-    color: '#aaa',
-    marginTop: '16px',
-  },
+  disclaimer: { fontSize: '11px', color: '#aaa', marginTop: '16px' },
   spinner: {
-    width: '36px',
-    height: '36px',
-    border: '3px solid #e2e8f0',
-    borderTopColor: '#4fc3f7',
-    borderRadius: '50%',
-    animation: 'spin 0.7s linear infinite',
-    margin: '0 auto',
+    width: '36px', height: '36px',
+    border: '3px solid #e2e8f0', borderTopColor: '#4fc3f7',
+    borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto',
+  },
+  spinnerDeep: {
+    width: '36px', height: '36px',
+    border: '3px solid #e2e8f0', borderTopColor: '#a78bfa',
+    borderRadius: '50%', animation: 'spin 0.9s linear infinite', margin: '0 auto',
   },
   errorCard: {
-    backgroundColor: '#fff5f5',
-    border: '1px solid #feb2b2',
-    borderRadius: '10px',
-    padding: '16px 20px',
-    color: '#c53030',
-    fontSize: '14px',
-    marginBottom: '24px',
+    backgroundColor: '#fff5f5', border: '1px solid #feb2b2',
+    borderRadius: '10px', padding: '16px 20px',
+    color: '#c53030', fontSize: '14px', marginBottom: '24px',
   },
-  results: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
+  results: { display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '8px' },
   resultHeader: {
-    backgroundColor: '#1a1a2e',
-    color: 'white',
-    borderRadius: '14px',
-    padding: '36px 32px',
-    textAlign: 'center',
+    backgroundColor: '#1a1a2e', color: 'white',
+    borderRadius: '14px', padding: '36px 32px', textAlign: 'center',
   },
-  companyName: {
-    fontSize: '28px',
-    fontWeight: '800',
-    marginBottom: '12px',
-  },
+  companyName: { fontSize: '28px', fontWeight: '800', marginBottom: '12px' },
   overviewText: {
-    opacity: 0.75,
-    lineHeight: '1.7',
-    fontSize: '15px',
-    marginBottom: '20px',
-    maxWidth: '640px',
-    margin: '0 auto 20px',
+    opacity: 0.75, lineHeight: '1.7', fontSize: '15px',
+    marginBottom: '20px', maxWidth: '640px', margin: '0 auto 20px',
   },
   valueLine: {
     fontSize: 'clamp(16px, 2.5vw, 21px)',
-    fontWeight: '700',
-    fontStyle: 'italic',
-    color: '#4fc3f7',
-    lineHeight: '1.5',
+    fontWeight: '700', fontStyle: 'italic', color: '#4fc3f7', lineHeight: '1.5',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
-  },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' },
   resultCard: {
-    backgroundColor: 'white',
-    borderRadius: '14px',
-    padding: '24px',
+    backgroundColor: 'white', borderRadius: '14px', padding: '24px',
+    boxShadow: '0 2px 20px rgba(0,0,0,0.07)', borderTop: '4px solid #ccc',
+  },
+  sectionTitle: { fontSize: '15px', fontWeight: '700', marginBottom: '14px', marginTop: 0 },
+  bodyText: { fontSize: '14px', lineHeight: '1.7', color: '#444', margin: 0 },
+  list: { paddingLeft: '18px', margin: 0 },
+  listItem: { fontSize: '14px', lineHeight: '1.6', color: '#444', marginBottom: '10px' },
+  deepSection: { marginTop: '12px' },
+  deepDivider: { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px', marginTop: '12px' },
+  deepDividerLine: { flex: 1, height: '1px', backgroundColor: '#e2e8f0' },
+  deepDividerLabel: {
+    fontSize: '13px', fontWeight: '700', color: '#64748b',
+    whiteSpace: 'nowrap', letterSpacing: '0.5px', textTransform: 'uppercase',
+  },
+  deepCard: {
+    backgroundColor: 'white', borderRadius: '14px', padding: '28px 32px',
     boxShadow: '0 2px 20px rgba(0,0,0,0.07)',
-    borderTop: '4px solid #ccc',
+    borderLeft: '4px solid #ccc',
   },
-  sectionTitle: {
-    fontSize: '15px',
-    fontWeight: '700',
-    marginBottom: '14px',
-    marginTop: 0,
-  },
-  bodyText: {
-    fontSize: '14px',
-    lineHeight: '1.7',
-    color: '#444',
-    margin: 0,
-  },
-  list: {
-    paddingLeft: '18px',
-    margin: 0,
-  },
-  listItem: {
-    fontSize: '14px',
-    lineHeight: '1.6',
-    color: '#444',
-    marginBottom: '10px',
-  },
+  deepSectionTitle: { fontSize: '16px', fontWeight: '700', marginBottom: '16px', marginTop: 0 },
   footer: {
-    backgroundColor: '#1a1a2e',
-    color: 'white',
-    padding: '40px 24px',
-    textAlign: 'center',
-    lineHeight: '1.8',
-    fontSize: '14px',
+    backgroundColor: '#1a1a2e', color: 'white',
+    padding: '40px 24px', textAlign: 'center', lineHeight: '1.8', fontSize: '14px',
   },
 };
