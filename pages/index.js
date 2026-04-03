@@ -80,14 +80,19 @@ export default function Home() {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
       const shareUrl = `${window.location.origin}/report/${data.id}`;
-      setShareId(data.id);
-      await navigator.clipboard.writeText(shareUrl);
-      setShareStatus('copied');
-      setTimeout(() => setShareStatus('idle'), 3000);
+      setShareId(shareUrl);
+      // Try clipboard — but do not let it block showing the link
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus('ready'), 1500);
+      } catch {
+        // Clipboard blocked — just show the link directly
+        setShareStatus('ready');
+      }
     } catch (err) {
       console.error('Share error:', err);
       setShareStatus('error');
-      setTimeout(() => setShareStatus('idle'), 3000);
     }
   };
 
@@ -325,35 +330,71 @@ export default function Home() {
 
           {/* Share + Run Another */}
           {assessment && !loading && (
-            <div style={{ textAlign: 'center', marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={handleShare}
-                disabled={shareStatus === 'saving'}
-                style={{
-                  ...s.button,
-                  backgroundColor: shareStatus === 'copied' ? '#34d399' : shareStatus === 'error' ? '#f87171' : '#4fc3f7',
-                  color: '#1a1a2e',
-                  minWidth: '200px',
-                  opacity: shareStatus === 'saving' ? 0.7 : 1,
-                  cursor: shareStatus === 'saving' ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {shareStatus === 'saving' && '⏳ Saving…'}
-                {shareStatus === 'copied' && '✅ Link Copied!'}
-                {shareStatus === 'error' && '⚠️ Error — Try Again'}
-                {shareStatus === 'idle' && '🔗 Copy Share Link'}
-              </button>
-              <button
-                onClick={handleReset}
-                style={{
-                  ...s.button,
-                  backgroundColor: '#fff',
-                  color: '#1a1a2e',
-                  border: '2px solid #1a1a2e',
-                }}
-              >
-                ↑ Run Another Assessment
-              </button>
+            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+
+              {/* Share link display box — shown once saved */}
+              {shareId && (shareStatus === 'ready' || shareStatus === 'copied') && (
+                <div style={s.shareLinkBox}>
+                  <p style={s.shareLinkLabel}>
+                    {shareStatus === 'copied' ? '✅ Link copied to clipboard!' : '🔗 Your shareable link:'}
+                  </p>
+                  <div style={s.shareLinkRow}>
+                    <input
+                      readOnly
+                      value={shareId}
+                      onFocus={e => e.target.select()}
+                      style={s.shareLinkInput}
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(shareId).catch(() => {});
+                        setShareStatus('copied');
+                        setTimeout(() => setShareStatus('ready'), 2000);
+                      }}
+                      style={{ ...s.button, backgroundColor: '#4fc3f7', color: '#1a1a2e', whiteSpace: 'nowrap' }}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {/* Show Share button only if not yet saved */}
+                {!shareId && (
+                  <button
+                    onClick={handleShare}
+                    disabled={shareStatus === 'saving'}
+                    style={{
+                      ...s.button,
+                      backgroundColor: '#4fc3f7',
+                      color: '#1a1a2e',
+                      minWidth: '200px',
+                      opacity: shareStatus === 'saving' ? 0.7 : 1,
+                      cursor: shareStatus === 'saving' ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {shareStatus === 'saving' ? '⏳ Saving…' : '🔗 Generate Share Link'}
+                  </button>
+                )}
+                {shareStatus === 'error' && (
+                  <p style={{ color: '#c53030', fontSize: '14px', margin: 0 }}>
+                    ⚠️ Could not save report — please try again.
+                  </p>
+                )}
+                <button
+                  onClick={handleReset}
+                  style={{
+                    ...s.button,
+                    backgroundColor: '#fff',
+                    color: '#1a1a2e',
+                    border: '2px solid #1a1a2e',
+                  }}
+                >
+                  ↑ Run Another Assessment
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -572,5 +613,37 @@ const s = {
   footer: {
     backgroundColor: '#1a1a2e', color: 'white',
     padding: '40px 24px', textAlign: 'center', lineHeight: '1.8', fontSize: '14px',
+  },
+  shareLinkBox: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '20px 24px',
+    boxShadow: '0 2px 20px rgba(0,0,0,0.08)',
+    width: '100%',
+    maxWidth: '600px',
+    border: '2px solid #34d399',
+  },
+  shareLinkLabel: {
+    fontSize: '14px',
+    fontWeight: '700',
+    color: '#065f46',
+    marginBottom: '10px',
+    marginTop: 0,
+  },
+  shareLinkRow: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+  },
+  shareLinkInput: {
+    flex: 1,
+    padding: '9px 12px',
+    fontSize: '13px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '6px',
+    fontFamily: 'monospace',
+    color: '#334155',
+    backgroundColor: '#f8fafc',
+    minWidth: 0,
   },
 };
