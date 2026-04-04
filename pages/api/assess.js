@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fetch the website content
     const siteResponse = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; PricingWire/1.0; +https://pricingwire.com)',
@@ -25,7 +24,6 @@ export default async function handler(req, res) {
 
     const html = await siteResponse.text();
 
-    // Strip scripts, styles, and HTML tags to get readable text
     const text = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
@@ -38,7 +36,6 @@ export default async function handler(req, res) {
       throw new Error('Could not extract enough content from that URL. Please try a different page.');
     }
 
-    // Call Anthropic API
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const audienceLine = targetAudience ? `Target Audience: ${targetAudience}` : '';
@@ -65,23 +62,28 @@ Return ONLY a valid JSON object — no preamble, no explanation, no markdown cod
 
 {
   "companyName": "The company name",
-  "companyOverview": "2-3 sentences describing what this company does and who it serves",
+  "companyOverview": "What this company does and who it serves. HARD LIMIT: 310 characters maximum — count every character and optimize the wording to fit precisely within this limit.",
   "valueHeadline": "One powerful, memorable sentence that captures the ultimate value this company delivers",
-  "mcv": "2-3 sentences describing their single most compelling value differentiator — the thing that makes them truly stand out",
-  "whyBuy": ["Compelling reason 1", "Compelling reason 2", "Compelling reason 3", "Compelling reason 4"],
-  "whyNow": ["Urgency driver 1", "Urgency driver 2", "Urgency driver 3"],
-  "targetBuyer": "A clear description of the ideal buyer persona for this company"
-}`,
+  "mcv": "A markdown string structured EXACTLY as follows: ONE succinct opening sentence that captures their single most compelling value differentiator. Then a blank line. Then 3–5 bullet points using - prefix, each bullet being one concise phrase or sentence that reinforces or expands on that differentiator.",
+  "whyBuy": ["Succinct compelling reason 1", "Succinct compelling reason 2", "Succinct compelling reason 3", "Succinct compelling reason 4"],
+  "whyNow": ["Succinct urgency driver 1", "Succinct urgency driver 2", "Succinct urgency driver 3"],
+  "targetBuyer": "ONE relevant succinct sentence describing the ideal buyer persona for this company."
+}
+
+CRITICAL RULES — violating any of these is unacceptable:
+- companyOverview MUST be 310 characters or fewer — count every character carefully
+- whyBuy MUST contain EXACTLY 4 items — no more, no fewer
+- whyNow MUST contain EXACTLY 3 items — no more, no fewer
+- targetBuyer MUST be a single sentence only — no semicolons splitting into multiple thoughts
+- mcv MUST be a markdown string: one sentence, then a blank line, then bullet points prefixed with -`,
         },
       ],
     });
 
     const rawContent = message.content[0].text.trim();
 
-    // Safely parse the JSON response
     let assessment;
     try {
-      // Strip any accidental markdown fences just in case
       const cleaned = rawContent.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
       assessment = JSON.parse(cleaned);
     } catch {
