@@ -46,7 +46,7 @@ export default function Home() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        setAssessment(data);
+        set(data);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -55,15 +55,15 @@ export default function Home() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        setDeepAssessment(data);
+        setDeep(data);
       })
       .catch(err => setDeepError(err.message))
       .finally(() => setDeepLoading(false));
   };
 
   const handleReset = () => {
-    setAssessment(null);
-    setDeepAssessment(null);
+    set(null);
+    setDeep(null);
     setShareId(null);
     setShareStatus('idle');
     setShareError('');
@@ -77,7 +77,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessment, deepAssessment, url }),
+        body: JSON.stringify({ , deep, url }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -97,12 +97,12 @@ export default function Home() {
     }
   };
 
-  const showDeepSection = deepLoading || deepAssessment || deepError;
+  const showDeepSection = deepLoading || deep || deepError;
 
   return (
     <>
       <Head>
-        <title>Value Impact Assessment — PricingWire</title>
+        <title>Value Impact  — PricingWire</title>
         <meta name="description" content="Instantly generate a compelling value story for your company." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -116,7 +116,7 @@ export default function Home() {
         {/* ── HERO ── */}
         <section style={s.hero}>
           <p style={s.heroEyebrow}>For Technology Innovators</p>
-          <h1 style={s.heroTitle}>Value Impact Assessment</h1>
+          <h1 style={s.heroTitle}>Value Impact Analyzer</h1>
           <p style={s.heroSub}>
             Instantly generate a compelling value story that highlights <strong>"Why Buy?"</strong> and <strong>"Why Now?"</strong>
           </p>
