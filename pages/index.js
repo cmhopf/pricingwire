@@ -116,7 +116,7 @@ export default function Home() {
         {/* ── HERO ── */}
         <section style={s.hero}>
           <p style={s.heroEyebrow}>For Technology Innovators</p>
-          <h1 style={s.heroTitle}>Value Impact Analyzer</h1>
+          <h1 style={s.heroTitle}>Value Impact Assessment</h1>
           <p style={s.heroSub}>
             Instantly generate a compelling value story that highlights <strong>"Why Buy?"</strong> and <strong>"Why Now?"</strong>
           </p>
