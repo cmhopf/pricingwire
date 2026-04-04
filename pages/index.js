@@ -113,19 +113,12 @@ export default function Home() {
 
       <div style={s.page}>
 
-        {/* ── NAV ── */}
-        <nav style={s.nav}>
-          <span style={s.navLogo}>PricingWire</span>
-          <span style={s.navTagline}>Value Impact Assessment</span>
-        </nav>
-
         {/* ── HERO ── */}
         <section style={s.hero}>
           <p style={s.heroEyebrow}>For Technology Innovators</p>
-          <h1 style={s.heroTitle}>What's your most<br /><em>compelling value?</em></h1>
+          <h1 style={s.heroTitle}>Value Impact Assessment</h1>
           <p style={s.heroSub}>
-            Enter any company URL and instantly receive a structured value story —
-            built around <strong>Why Buy</strong> and <strong>Why Now</strong>.
+            Instantly generate a compelling value story that highlights <strong>"Why Buy?"</strong> and <strong>"Why Now?"</strong>
           </p>
         </section>
 
