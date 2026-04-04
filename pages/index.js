@@ -330,7 +330,7 @@ export default function Home() {
               )}
 
               {shareStatus === 'error' && (
-                <p style={{ color: '#b91c1c', fontSize: '13px', textAlign: 'center' }}>
+                <p style={{ color: '#b91c1c', fontSize: '15px', textAlign: 'center' }}>
                   ⚠️ {shareError || 'Could not save report — please try again.'}
                 </p>
               )}
@@ -384,14 +384,14 @@ export default function Home() {
 
         /* ── Markdown styles ── */
         .md-content p {
-          font-size: 14px; line-height: 1.75; color: #374151;
+          font-size: 16px; line-height: 1.75; color: #374151;
           margin-bottom: 12px;
         }
         .md-content p:last-child { margin-bottom: 0; }
 
         .md-content ul { padding-left: 20px; margin-bottom: 12px; }
         .md-content li {
-          font-size: 14px; line-height: 1.7; color: #374151;
+          font-size: 16px; line-height: 1.7; color: #374151;
           margin-bottom: 8px;
         }
 
@@ -399,7 +399,7 @@ export default function Home() {
 
         .md-content h3, .md-content h4 {
           font-family: 'DM Sans', sans-serif;
-          font-size: 15px; font-weight: 600;
+          font-size: 17px; font-weight: 600;
           color: #111827; margin: 20px 0 8px;
         }
         .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
@@ -409,12 +409,12 @@ export default function Home() {
 
         .md-content table {
           width: 100%; border-collapse: collapse;
-          font-size: 13px; margin-top: 4px;
+          font-size: 15px; margin-top: 4px;
         }
         .md-content th {
           background: #111827; color: #fff;
           padding: 10px 14px; text-align: left;
-          font-size: 11px; font-weight: 600;
+          font-size: 13px; font-weight: 600;
           letter-spacing: 0.5px; text-transform: uppercase;
         }
         .md-content th strong { color: #fff; font-weight: 600; }
@@ -461,10 +461,10 @@ const s = {
     backgroundColor: bg,
   },
   navLogo: {
-    fontSize: '15px', fontWeight: '700', color: ink, letterSpacing: '-0.3px',
+    fontSize: '17px', fontWeight: '700', color: ink, letterSpacing: '-0.3px',
   },
   navTagline: {
-    fontSize: '12px', color: muted, letterSpacing: '0.5px',
+    fontSize: '14px', color: muted, letterSpacing: '0.5px',
   },
 
   // Hero
@@ -473,16 +473,16 @@ const s = {
     borderBottom: `1px solid ${border}`, backgroundColor: bg,
   },
   heroEyebrow: {
-    fontSize: '11px', fontWeight: '600', letterSpacing: '2px',
+    fontSize: '13px', fontWeight: '600', letterSpacing: '2px',
     textTransform: 'uppercase', color: teal, marginBottom: '20px',
   },
   heroTitle: {
-    fontFamily: serif, fontSize: 'clamp(36px, 5vw, 60px)',
+    fontFamily: serif, fontSize: 'clamp(38px, 5vw, 62px)',
     fontWeight: '400', color: ink, lineHeight: '1.15',
     marginBottom: '20px', letterSpacing: '-0.5px',
   },
   heroSub: {
-    fontSize: '16px', color: body, lineHeight: '1.75',
+    fontSize: '18px', color: body, lineHeight: '1.75',
     maxWidth: '480px', margin: '0 auto',
   },
 
@@ -499,30 +499,30 @@ const s = {
     boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '32px',
   },
   label: {
-    display: 'block', fontSize: '13px', fontWeight: '600',
+    display: 'block', fontSize: '15px', fontWeight: '600',
     color: ink, marginBottom: '8px',
   },
   optional: { fontWeight: '400', color: muted },
   inputRow: { display: 'flex', gap: '10px', marginBottom: '16px' },
   input: {
-    flex: 1, padding: '10px 14px', fontSize: '14px',
+    flex: 1, padding: '10px 14px', fontSize: '16px',
     border: `1px solid ${border}`, borderRadius: '8px',
     fontFamily: font, color: ink, backgroundColor: bg,
     outline: 'none', minWidth: 0,
   },
   btn: {
     padding: '10px 22px', backgroundColor: ink, color: '#fff',
-    border: 'none', borderRadius: '8px', fontSize: '14px',
+    border: 'none', borderRadius: '8px', fontSize: '16px',
     fontWeight: '600', cursor: 'pointer', fontFamily: font,
     whiteSpace: 'nowrap', letterSpacing: '-0.2px',
   },
   btnOutline: {
     padding: '10px 22px', backgroundColor: bg, color: ink,
-    border: `1px solid ${border}`, borderRadius: '8px', fontSize: '14px',
+    border: `1px solid ${border}`, borderRadius: '8px', fontSize: '16px',
     fontWeight: '500', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap',
   },
   advToggle: {
-    background: 'none', border: 'none', fontSize: '12px',
+    background: 'none', border: 'none', fontSize: '14px',
     color: muted, cursor: 'pointer', fontFamily: font,
     padding: '0 0 16px', fontWeight: '500',
   },
@@ -530,7 +530,7 @@ const s = {
     display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
     paddingTop: '16px', borderTop: `1px solid ${border}`, marginBottom: '4px',
   },
-  disclaimer: { fontSize: '11px', color: muted, marginTop: '16px' },
+  disclaimer: { fontSize: '13px', color: muted, marginTop: '16px' },
 
   // Loading
   loadingBox: {
@@ -544,13 +544,13 @@ const s = {
     borderRadius: '50%', animation: 'spin 0.7s linear infinite',
     margin: '0 auto',
   },
-  loadingText: { fontSize: '14px', color: muted, marginTop: '12px' },
+  loadingText: { fontSize: '16px', color: muted, marginTop: '12px' },
 
   // Error
   errorBox: {
     backgroundColor: '#fef2f2', border: '1px solid #fecaca',
     borderRadius: '8px', padding: '14px 18px',
-    color: '#b91c1c', fontSize: '13px', marginBottom: '24px',
+    color: '#b91c1c', fontSize: '15px', marginBottom: '24px',
   },
 
   // Results
@@ -564,16 +564,16 @@ const s = {
     padding: '36px 36px 28px', borderBottom: `1px solid ${border}`,
   },
   companyName: {
-    fontSize: '26px', fontWeight: '700', color: ink,
+    fontSize: '28px', fontWeight: '700', color: ink,
     marginBottom: '12px', letterSpacing: '-0.5px',
   },
   valueHeadline: {
-    fontFamily: serif, fontSize: 'clamp(17px, 2.5vw, 22px)',
+    fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)',
     fontStyle: 'italic', color: teal, lineHeight: '1.5',
     marginBottom: '14px',
   },
   companyOverview: {
-    fontSize: '14px', color: body, lineHeight: '1.75',
+    fontSize: '16px', color: body, lineHeight: '1.75',
   },
   divider: { height: '1px', backgroundColor: border },
   grid2: {
@@ -584,15 +584,15 @@ const s = {
     borderRight: `1px solid ${border}`,
   },
   blockLabel: {
-    fontSize: '11px', fontWeight: '700', letterSpacing: '1px',
+    fontSize: '13px', fontWeight: '700', letterSpacing: '1px',
     textTransform: 'uppercase', color: muted, marginBottom: '12px',
   },
   blockText: {
-    fontSize: '14px', lineHeight: '1.75', color: body,
+    fontSize: '16px', lineHeight: '1.75', color: body,
   },
   ul: { paddingLeft: '18px', margin: 0 },
   li: {
-    fontSize: '14px', lineHeight: '1.7', color: body,
+    fontSize: '16px', lineHeight: '1.7', color: body,
     marginBottom: '10px',
   },
 
@@ -609,23 +609,23 @@ const s = {
     alignItems: 'center', gap: '16px', flexWrap: 'wrap',
   },
   deepPill: {
-    fontSize: '11px', fontWeight: '700', letterSpacing: '1.5px',
+    fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px',
     textTransform: 'uppercase', color: teal,
     backgroundColor: '#f0fdf9', border: '1px solid #99f6e4',
     borderRadius: '20px', padding: '4px 12px',
   },
-  deepSubtitle: { fontSize: '12px', color: muted },
+  deepSubtitle: { fontSize: '14px', color: muted },
   deepSections: { display: 'flex', flexDirection: 'column' },
   deepBlock: {
     padding: '28px 32px', borderBottom: `1px solid ${border}`,
     backgroundColor: bg,
   },
   deepBlockLabel: {
-    fontSize: '12px', fontWeight: '700', letterSpacing: '0.8px',
+    fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px',
     textTransform: 'uppercase', color: ink, marginBottom: '16px',
   },
   deepNote: {
-    fontSize: '13px', color: muted, marginBottom: '16px',
+    fontSize: '15px', color: muted, marginBottom: '16px',
     fontStyle: 'italic', lineHeight: '1.6',
   },
 
@@ -640,19 +640,19 @@ const s = {
     padding: '18px 20px', backgroundColor: '#f0fdf9',
   },
   shareLinkLabel: {
-    fontSize: '13px', fontWeight: '600', color: '#0f766e',
+    fontSize: '15px', fontWeight: '600', color: '#0f766e',
     marginBottom: '10px',
   },
   shareLinkRow: { display: 'flex', gap: '8px', alignItems: 'center' },
   shareLinkInput: {
-    flex: 1, padding: '8px 12px', fontSize: '12px',
+    flex: 1, padding: '8px 12px', fontSize: '14px',
     border: `1px solid ${border}`, borderRadius: '6px',
     fontFamily: 'monospace', color: body,
     backgroundColor: bg, minWidth: 0,
   },
   copyBtn: {
     padding: '8px 16px', backgroundColor: teal, color: '#fff',
-    border: 'none', borderRadius: '6px', fontSize: '13px',
+    border: 'none', borderRadius: '6px', fontSize: '15px',
     fontWeight: '600', cursor: 'pointer', fontFamily: font,
   },
   actionBtns: {
@@ -665,12 +665,12 @@ const s = {
     textAlign: 'center', backgroundColor: bgSoft,
   },
   footerLogo: {
-    fontSize: '14px', fontWeight: '700', color: ink, marginBottom: '8px',
+    fontSize: '16px', fontWeight: '700', color: ink, marginBottom: '8px',
   },
   footerText: {
-    fontSize: '13px', color: muted, lineHeight: '1.7', marginBottom: '6px',
+    fontSize: '15px', color: muted, lineHeight: '1.7', marginBottom: '6px',
   },
   footerMcv: {
-    fontSize: '12px', color: muted, fontStyle: 'italic',
+    fontSize: '14px', color: muted, fontStyle: 'italic',
   },
 };
