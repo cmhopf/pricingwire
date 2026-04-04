@@ -20,7 +20,6 @@ function extractLinks(html, baseUrl) {
   for (const match of matches) {
     try {
       const resolved = new URL(match[1], baseUrl);
-      // Only same-domain, only http(s), skip anchors/files
       if (
         resolved.hostname === base.hostname &&
         (resolved.protocol === 'http:' || resolved.protocol === 'https:') &&
@@ -66,7 +65,6 @@ export default async function handler(req, res) {
   // ── Step 2: Discover subpages ───────────────────────────────────────
   const allLinks = extractLinks(homepageHtml, url);
 
-  // Prioritize pages likely to have useful content
   const priorityKeywords = ['product', 'solution', 'feature', 'about', 'pricing', 'platform', 'why', 'how', 'benefit', 'customer', 'case', 'use'];
   const scored = allLinks.map(link => {
     const lower = link.toLowerCase();
@@ -94,7 +92,6 @@ export default async function handler(req, res) {
       }
       const html = await r.text();
 
-      // Try to extract page title
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : subUrl;
 
@@ -151,10 +148,27 @@ STEP 3 — REFINED TOP 3 TABLE (key: "refinedTable")
 Evaluate all 5 rows and return ONLY the 3 most compelling as a markdown table using identical column formatting. No intro or explanation.
 
 STEP 4 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
-Return markdown-formatted objection handling for CEO, CRO, and CFO. For each persona, provide exactly 2 objections with sharp, confident responses (3–5 sentences max each). Format:
+Return markdown-formatted objection handling for CEO, CRO, and CFO. For each persona, provide exactly 2 objections with responses. Use EXACTLY this format for every objection block:
+
 **[Persona Name]**
-- **Objection 1:** "[Objection]" — [Response]
-- **Objection 2:** "[Objection]" — [Response]
+
+**"[Objection stated as a direct quote]"**
+
+- [One sentence response.]
+- [One sentence response.]
+- [Optional third bullet — one sentence only if genuinely needed.]
+
+**"[Second objection stated as a direct quote]"**
+
+- [One sentence response.]
+- [One sentence response.]
+- [Optional third bullet — one sentence only if genuinely needed.]
+
+CRITICAL FORMATTING RULES FOR STEP 4:
+- The objection text in quotes MUST be wrapped in bold markdown: **"..."**
+- Leave exactly one blank line between the bolded objection and its bullet-point responses
+- Each bullet MUST be exactly one sentence — no run-ons, no semicolons joining two thoughts
+- Maximum 3 bullets per objection response
 
 CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no commentary outside the JSON.`;
 
