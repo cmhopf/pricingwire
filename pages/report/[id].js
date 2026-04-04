@@ -170,17 +170,17 @@ export default function ReportPage() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .md-content p { font-size: 14px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
+        .md-content p { font-size: 16px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
         .md-content p:last-child { margin-bottom: 0; }
         .md-content ul { padding-left: 20px; margin-bottom: 12px; }
-        .md-content li { font-size: 14px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
+        .md-content li { font-size: 16px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
         .md-content strong { color: #111827; font-weight: 600; }
-        .md-content h3, .md-content h4 { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #111827; margin: 20px 0 8px; }
+        .md-content h3, .md-content h4 { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: #111827; margin: 20px 0 8px; }
         .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
 
         .table-wrap { overflow-x: auto; }
-        .md-content table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
-        .md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        .md-content table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
+        .md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
         .md-content th strong { color: #fff; font-weight: 600; }
         .md-content td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: top; line-height: 1.6; color: #374151; }
         .md-content tr:last-child td { border-bottom: none; }
@@ -208,38 +208,38 @@ const bgSoft = '#f9fafb';
 const s = {
   page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
   nav: { borderBottom: `1px solid ${border}`, padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: bg },
-  navLogo: { fontSize: '15px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
-  navUrl: { fontSize: '12px', color: muted },
+  navLogo: { fontSize: '17px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
+  navUrl: { fontSize: '14px', color: muted },
   main: { maxWidth: '880px', margin: '0 auto', padding: '48px 24px 80px', width: '100%', flex: 1 },
   loadingBox: { textAlign: 'center', padding: '40px 24px', border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bgSoft, marginBottom: '24px' },
   spinner: { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
-  loadingText: { fontSize: '14px', color: muted, marginTop: '12px' },
-  errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '13px', marginBottom: '24px' },
+  loadingText: { fontSize: '16px', color: muted, marginTop: '12px' },
+  errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
   resultsWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
   companyBlock: { padding: '36px 36px 28px', borderBottom: `1px solid ${border}` },
-  companyName: { fontSize: '26px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
-  valueHeadline: { fontFamily: serif, fontSize: 'clamp(17px, 2.5vw, 22px)', fontStyle: 'italic', color: teal, lineHeight: '1.5', marginBottom: '14px' },
-  companyOverview: { fontSize: '14px', color: body, lineHeight: '1.75' },
+  companyName: { fontSize: '28px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
+  valueHeadline: { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', fontStyle: 'italic', color: teal, lineHeight: '1.5', marginBottom: '14px' },
+  companyOverview: { fontSize: '16px', color: body, lineHeight: '1.75' },
   divider: { height: '1px', backgroundColor: border },
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr' },
   block: { padding: '28px 32px', borderRight: `1px solid ${border}` },
-  blockLabel: { fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: muted, marginBottom: '12px' },
-  blockText: { fontSize: '14px', lineHeight: '1.75', color: body },
+  blockLabel: { fontSize: '13px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: muted, marginBottom: '12px' },
+  blockText: { fontSize: '16px', lineHeight: '1.75', color: body },
   ul: { paddingLeft: '18px', margin: 0 },
-  li: { fontSize: '14px', lineHeight: '1.7', color: body, marginBottom: '10px' },
+  li: { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
   deepWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
   deepHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
-  deepPill: { fontSize: '11px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
-  deepSubtitle: { fontSize: '12px', color: muted },
+  deepPill: { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
+  deepSubtitle: { fontSize: '14px', color: muted },
   deepSections: { display: 'flex', flexDirection: 'column' },
   deepBlock: { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
-  deepBlockLabel: { fontSize: '12px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
-  deepNote: { fontSize: '13px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
+  deepBlockLabel: { fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
+  deepNote: { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
   ctaBox: { border: `1px solid ${border}`, borderRadius: '12px', padding: '32px', textAlign: 'center', backgroundColor: bgSoft },
-  ctaText: { fontSize: '15px', color: body, marginBottom: '16px', lineHeight: '1.6' },
-  ctaBtn: { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '14px', textDecoration: 'none', fontFamily: font },
+  ctaText: { fontSize: '17px', color: body, marginBottom: '16px', lineHeight: '1.6' },
+  ctaBtn: { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
   footer: { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
-  footerLogo: { fontSize: '14px', fontWeight: '700', color: ink, marginBottom: '8px' },
-  footerText: { fontSize: '13px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
-  footerMcv: { fontSize: '12px', color: muted, fontStyle: 'italic' },
+  footerLogo: { fontSize: '16px', fontWeight: '700', color: ink, marginBottom: '8px' },
+  footerText: { fontSize: '15px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
+  footerMcv: { fontSize: '14px', color: muted, fontStyle: 'italic' },
 };
