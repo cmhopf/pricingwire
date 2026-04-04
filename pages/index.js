@@ -46,7 +46,7 @@ export default function Home() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        set(data);
+        setAssessment(data);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -55,15 +55,15 @@ export default function Home() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        setDeep(data);
+        setDeepAssessment(data);
       })
       .catch(err => setDeepError(err.message))
       .finally(() => setDeepLoading(false));
   };
 
   const handleReset = () => {
-    set(null);
-    setDeep(null);
+    setAssessment(null);
+    setDeepAssessment(null);
     setShareId(null);
     setShareStatus('idle');
     setShareError('');
@@ -77,7 +77,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ , deep, url }),
+        body: JSON.stringify({ assessment, deepAssessment, url }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -97,12 +97,12 @@ export default function Home() {
     }
   };
 
-  const showDeepSection = deepLoading || deep || deepError;
+  const showDeepSection = deepLoading || deepAssessment || deepError;
 
   return (
     <>
       <Head>
-        <title>Value Impact  — PricingWire</title>
+        <title>Value Impact Assessment — PricingWire</title>
         <meta name="description" content="Instantly generate a compelling value story for your company." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
