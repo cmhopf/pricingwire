@@ -97,8 +97,6 @@ export default function Home() {
     }
   };
 
-  const showDeepSection = deepLoading || deepAssessment || deepError;
-
   return (
     <>
       <Head>
@@ -118,12 +116,14 @@ export default function Home() {
           <p style={s.heroEyebrow}>For Technology Innovators</p>
           <h1 style={s.heroTitle}>Value Impact Assessment</h1>
           <p style={s.heroSub}>
-            Instantly generate a compelling value story that highlights <strong>"Why Buy?"</strong> and <strong>"Why Now?"</strong>
+            Instantly generate a compelling value story that highlights <strong>&quot;Why Buy?&quot;</strong> and <strong>&quot;Why Now?&quot;</strong>
           </p>
         </section>
 
-        {/* ── INPUT ── */}
+        {/* ── MAIN ── */}
         <main style={s.main}>
+
+          {/* ── INPUT CARD ── */}
           <div style={s.inputCard}>
             <form onSubmit={handleSubmit}>
               <label style={s.label}>Company website URL</label>
@@ -178,49 +178,69 @@ export default function Home() {
               )}
 
               <p style={s.disclaimer}>
-                By submitting a URL, you confirm you have permission to analyze that website's public content.
+                By submitting a URL, you confirm you have permission to analyze that website&apos;s public content.
               </p>
             </form>
           </div>
 
-          {/* Loading */}
-          {loading && (
+          {/* ── ERRORS ── */}
+          {error && <div style={s.errorBox}>⚠️ {error}</div>}
+          {deepError && <div style={s.errorBox}>⚠️ {deepError}</div>}
+
+          {/* ── COMPREHENSIVE LOADING SPINNER ── */}
+          {(loading || deepLoading) && (
             <div style={s.loadingBox}>
               <div style={s.spinner} />
-              <p style={s.loadingText}>Analyzing website…</p>
+              <p style={s.loadingText}>Comprehensive Assessment in Progress ... this may take ~40–50 seconds</p>
             </div>
           )}
 
-          {error && <div style={s.errorBox}>⚠️ {error}</div>}
+          {/* ── YOUR MOST COMPELLING VALUE (MCV) — TOP SECTION ── */}
+          {deepAssessment && (
+            <div style={s.mcvSection}>
+              <h2 style={s.mcvHeading}>Your Most Compelling Value (MCV)</h2>
+              <div className="md-content mcv-table-wrap table-wrap">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.refinedTable}</ReactMarkdown>
+              </div>
+            </div>
+          )}
 
-          {/* ── QUICK ASSESSMENT ── */}
+          {/* ── EXECUTIVE DEEP-DIVE SECTION ── */}
           {assessment && (
-            <div style={s.resultsWrap}>
+            <div style={s.deepWrap}>
 
-              {/* Company headline */}
+              {/* Deep-Dive Header */}
+              <div style={s.deepHeader}>
+                <span style={s.deepPill}>Executive Deep-Dive</span>
+                <p style={s.deepSubtitle}>Multi-page analysis · CEO · CRO · CFO</p>
+              </div>
+
+              {/* Company Name + Value Headline + Company Overview */}
               <div style={s.companyBlock}>
                 <div style={s.companyName}>{assessment.companyName}</div>
-                <p style={s.valueHeadline}>"{assessment.valueHeadline}"</p>
+                <p style={s.valueHeadline}>&quot;{assessment.valueHeadline}&quot;</p>
                 <p style={s.companyOverview}>{assessment.companyOverview}</p>
               </div>
 
               <div style={s.divider} />
 
-              {/* MCV + Buyer */}
+              {/* Brief Value Story | Ideal Target Buyer(s) */}
               <div className="grid-2" style={s.grid2}>
                 <div style={s.block}>
-                  <div style={s.blockLabel}>⭐ Most Compelling Value</div>
-                  <p style={s.blockText}>{assessment.mcv}</p>
+                  <div style={s.blockLabel}>⭐ Brief Value Story</div>
+                  <div className="md-content block-md">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{assessment.mcv}</ReactMarkdown>
+                  </div>
                 </div>
                 <div style={s.block}>
-                  <div style={s.blockLabel}>🎯 Ideal Target Buyer</div>
+                  <div style={s.blockLabel}>🎯 Ideal Target Buyer(s)</div>
                   <p style={s.blockText}>{assessment.targetBuyer}</p>
                 </div>
               </div>
 
               <div style={s.divider} />
 
-              {/* Why Buy + Why Now */}
+              {/* Why Buy | Why Now */}
               <div className="grid-2" style={s.grid2}>
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
@@ -240,36 +260,12 @@ export default function Home() {
                 </div>
               </div>
 
-            </div>
-          )}
-
-          {/* ── DEEP DIVE ── */}
-          {showDeepSection && (
-            <div style={s.deepWrap}>
-              <div style={s.deepHeader}>
-                <span style={s.deepPill}>Executive Deep-Dive</span>
-                <p style={s.deepSubtitle}>Multi-page analysis · CEO · CRO · CFO</p>
-              </div>
-
-              {deepLoading && (
-                <div style={s.loadingBox}>
-                  <div style={{ ...s.spinner, borderTopColor: '#0d9488' }} />
-                  <p style={s.loadingText}>Crawling subpages — this takes 20–40 seconds…</p>
-                </div>
-              )}
-
-              {deepError && <div style={s.errorBox}>⚠️ {deepError}</div>}
-
+              {/* Deep-dive specifics — populate once deepAssessment is ready */}
               {deepAssessment && (
-                <div style={s.deepSections}>
+                <>
+                  <div style={s.divider} />
 
-                  <div style={s.deepBlock}>
-                    <div style={s.deepBlockLabel}>🔍 Source Audit</div>
-                    <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.sourceAudit}</ReactMarkdown>
-                    </div>
-                  </div>
-
+                  {/* Executive Impact Table — Top 5 */}
                   <div style={s.deepBlock}>
                     <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
                     <div className="md-content table-wrap">
@@ -277,13 +273,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ ...s.deepBlock, backgroundColor: '#f0fdf9', borderColor: '#99f6e4' }}>
-                    <div style={{ ...s.deepBlockLabel, color: '#0d9488' }}>🏆 Refined Top 3 Capabilities</div>
-                    <div className="md-content table-wrap">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.refinedTable}</ReactMarkdown>
-                    </div>
-                  </div>
-
+                  {/* Persona Objection Responses */}
                   <div style={s.deepBlock}>
                     <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
                     <p style={s.deepNote}>Anticipating the top objections from CEO, CRO, and CFO — with sharp, confident responses.</p>
@@ -292,13 +282,21 @@ export default function Home() {
                     </div>
                   </div>
 
-                </div>
+                  {/* Source Audit */}
+                  <div style={s.deepBlock}>
+                    <div style={s.deepBlockLabel}>🔍 Source Audit</div>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.sourceAudit}</ReactMarkdown>
+                    </div>
+                  </div>
+                </>
               )}
+
             </div>
           )}
 
           {/* ── ACTIONS ── */}
-          {assessment && !loading && (
+          {assessment && !loading && !deepLoading && (
             <div style={s.actionsWrap}>
 
               {shareId && (shareStatus === 'ready' || shareStatus === 'copied') && (
@@ -373,23 +371,18 @@ export default function Home() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        .fade-up { animation: fadeUp 0.4s ease forwards; }
-
-        /* ── Markdown styles ── */
+        /* ── General markdown styles ── */
         .md-content p {
           font-size: 16px; line-height: 1.75; color: #374151;
           margin-bottom: 12px;
         }
         .md-content p:last-child { margin-bottom: 0; }
-
         .md-content ul { padding-left: 20px; margin-bottom: 12px; }
         .md-content li {
           font-size: 16px; line-height: 1.7; color: #374151;
           margin-bottom: 8px;
         }
-
         .md-content strong { color: #111827; font-weight: 600; }
-
         .md-content h3, .md-content h4 {
           font-family: 'DM Sans', sans-serif;
           font-size: 17px; font-weight: 600;
@@ -399,7 +392,6 @@ export default function Home() {
 
         /* ── Table styles ── */
         .table-wrap { overflow-x: auto; }
-
         .md-content table {
           width: 100%; border-collapse: collapse;
           font-size: 15px; margin-top: 4px;
@@ -419,6 +411,17 @@ export default function Home() {
         .md-content tr:nth-child(even) td { background: #fafafa; }
         .md-content tr:hover td { background: #f0fdf9; }
 
+        /* ── MCV table — clean alternating, no green tint ── */
+        .mcv-table-wrap tr:nth-child(odd) td { background: #ffffff !important; }
+        .mcv-table-wrap tr:nth-child(even) td { background: #f9fafb !important; }
+        .mcv-table-wrap tr:hover td { background: #f5f5f5 !important; }
+
+        /* ── Brief Value Story block markdown — compact sizing ── */
+        .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
+        .block-md p:last-child { margin-bottom: 0; }
+        .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
+        .block-md li { font-size: 15px; line-height: 1.65; color: #374151; margin-bottom: 6px; }
+
         @media (max-width: 680px) {
           .grid-2 { grid-template-columns: 1fr !important; }
           .input-row { flex-direction: column !important; }
@@ -429,7 +432,7 @@ export default function Home() {
   );
 }
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
+// ── Design tokens ──────────────────────────────────────────────────────────────
 const font = "'DM Sans', -apple-system, sans-serif";
 const serif = "'DM Serif Display', Georgia, serif";
 const teal = '#0d9488';
@@ -444,20 +447,6 @@ const s = {
   page: {
     minHeight: '100vh', fontFamily: font, color: ink,
     backgroundColor: bg, display: 'flex', flexDirection: 'column',
-  },
-
-  // Nav
-  nav: {
-    borderBottom: `1px solid ${border}`,
-    padding: '16px 40px', display: 'flex',
-    alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: bg,
-  },
-  navLogo: {
-    fontSize: '17px', fontWeight: '700', color: ink, letterSpacing: '-0.3px',
-  },
-  navTagline: {
-    fontSize: '14px', color: muted, letterSpacing: '0.5px',
   },
 
   // Hero
@@ -537,7 +526,9 @@ const s = {
     borderRadius: '50%', animation: 'spin 0.7s linear infinite',
     margin: '0 auto',
   },
-  loadingText: { fontSize: '16px', color: muted, marginTop: '12px' },
+  loadingText: {
+    fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px',
+  },
 
   // Error
   errorBox: {
@@ -546,50 +537,19 @@ const s = {
     color: '#b91c1c', fontSize: '15px', marginBottom: '24px',
   },
 
-  // Results
-  resultsWrap: {
+  // Your MCV section (top)
+  mcvSection: {
     border: `1px solid ${border}`, borderRadius: '12px',
     backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-    marginBottom: '24px', overflow: 'hidden',
+    marginBottom: '24px', overflow: 'hidden', padding: '32px',
     animation: 'fadeUp 0.4s ease forwards',
   },
-  companyBlock: {
-    padding: '36px 36px 28px', borderBottom: `1px solid ${border}`,
-  },
-  companyName: {
-    fontSize: '28px', fontWeight: '700', color: ink,
-    marginBottom: '12px', letterSpacing: '-0.5px',
-  },
-  valueHeadline: {
-    fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)',
-    fontStyle: 'italic', color: teal, lineHeight: '1.5',
-    marginBottom: '14px',
-  },
-  companyOverview: {
-    fontSize: '16px', color: body, lineHeight: '1.75',
-  },
-  divider: { height: '1px', backgroundColor: border },
-  grid2: {
-    display: 'grid', gridTemplateColumns: '1fr 1fr',
-  },
-  block: {
-    padding: '28px 32px',
-    borderRight: `1px solid ${border}`,
-  },
-  blockLabel: {
-    fontSize: '13px', fontWeight: '700', letterSpacing: '1px',
-    textTransform: 'uppercase', color: muted, marginBottom: '12px',
-  },
-  blockText: {
-    fontSize: '16px', lineHeight: '1.75', color: body,
-  },
-  ul: { paddingLeft: '18px', margin: 0 },
-  li: {
-    fontSize: '16px', lineHeight: '1.7', color: body,
-    marginBottom: '10px',
+  mcvHeading: {
+    fontFamily: font, fontSize: '22px', fontWeight: '700',
+    color: ink, marginBottom: '20px', letterSpacing: '-0.3px',
   },
 
-  // Deep dive
+  // Executive Deep-Dive wrapper
   deepWrap: {
     border: `1px solid ${border}`, borderRadius: '12px',
     backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
@@ -608,7 +568,43 @@ const s = {
     borderRadius: '20px', padding: '4px 12px',
   },
   deepSubtitle: { fontSize: '14px', color: muted },
-  deepSections: { display: 'flex', flexDirection: 'column' },
+
+  // Company block (inside deepWrap)
+  companyBlock: {
+    padding: '36px 36px 28px', borderBottom: `1px solid ${border}`,
+  },
+  companyName: {
+    fontSize: '28px', fontWeight: '700', color: ink,
+    marginBottom: '12px', letterSpacing: '-0.5px',
+  },
+  valueHeadline: {
+    fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)',
+    color: '#5A5A5A', lineHeight: '1.5', marginBottom: '14px',
+  },
+  companyOverview: {
+    fontSize: '16px', color: body, lineHeight: '1.75',
+  },
+
+  divider: { height: '1px', backgroundColor: border },
+  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr' },
+  block: {
+    padding: '28px 32px',
+    borderRight: `1px solid ${border}`,
+  },
+  blockLabel: {
+    fontSize: '13px', fontWeight: '700', letterSpacing: '1px',
+    textTransform: 'uppercase', color: muted, marginBottom: '12px',
+  },
+  blockText: {
+    fontSize: '16px', lineHeight: '1.75', color: body,
+  },
+  ul: { paddingLeft: '18px', margin: 0 },
+  li: {
+    fontSize: '16px', lineHeight: '1.7', color: body,
+    marginBottom: '10px',
+  },
+
+  // Deep content blocks (impact table, objections, source audit)
   deepBlock: {
     padding: '28px 32px', borderBottom: `1px solid ${border}`,
     backgroundColor: bg,
