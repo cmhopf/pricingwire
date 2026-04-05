@@ -71,6 +71,7 @@ export default function ReportPage() {
   const assessment = report?.assessment;
   const deepAssessment = report?.deepAssessment;
   const sourceUrl = report?.url;
+  const personas = report?.personas || ['CEO', 'CRO', 'CFO'];
 
   return (
     <>
@@ -124,7 +125,7 @@ export default function ReportPage() {
               {/* Deep-Dive Header */}
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
-                <p style={s.deepSubtitle}>Multi-page analysis · CEO · CRO · CFO</p>
+                <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
               </div>
 
               {/* Company Name + Value Headline + Company Overview */}
@@ -186,7 +187,7 @@ export default function ReportPage() {
                   {/* Persona Objection Responses */}
                   <div style={s.deepBlock}>
                     <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
-                    <p style={s.deepNote}>Anticipating the top objections from CEO, CRO, and CFO — with sharp, confident responses.</p>
+                    <p style={s.deepNote}>Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.</p>
                     <div className="md-content">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.personaObjections}</ReactMarkdown>
                     </div>
