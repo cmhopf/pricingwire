@@ -55,6 +55,7 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [tone, setTone] = useState('Professional and persuasive');
+  const [singlePageOnly, setSinglePageOnly] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deepLoading, setDeepLoading] = useState(false);
@@ -87,7 +88,7 @@ export default function Home() {
     const deepPromise = fetch('/api/deep-assess', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, singlePageOnly }),
     });
 
     quickPromise
@@ -116,6 +117,7 @@ export default function Home() {
     setShareStatus('idle');
     setShareError('');
     setUrl('');
+    setSinglePageOnly(false);
     window.scrollTo(0, 0);
   };
 
@@ -202,6 +204,7 @@ export default function Home() {
               </button>
 
               {showAdvanced && (
+                <>
                 <div className="adv-grid" style={s.advGrid}>
                   <div>
                     <label style={s.label}>Target audience <span style={s.optional}>(optional)</span></label>
@@ -223,6 +226,19 @@ export default function Home() {
                     </select>
                   </div>
                 </div>
+                <div style={s.checkboxRow}>
+                  <label style={s.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={singlePageOnly}
+                      onChange={e => setSinglePageOnly(e.target.checked)}
+                      style={s.checkbox}
+                    />
+                    Analyze this Page Only
+                  </label>
+                  <span style={s.checkboxHint}>Skip subpage crawling — analyze only the submitted URL</span>
+                </div>
+                </>
               )}
 
               <p style={s.disclaimer}>
@@ -557,6 +573,21 @@ const s = {
   advGrid: {
     display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
     paddingTop: '16px', borderTop: `1px solid ${border}`, marginBottom: '4px',
+  },
+  checkboxRow: {
+    display: 'flex', alignItems: 'center', gap: '10px',
+    paddingTop: '14px', marginBottom: '4px',
+  },
+  checkboxLabel: {
+    display: 'flex', alignItems: 'center', gap: '7px',
+    fontSize: '14px', fontWeight: '600', color: ink, cursor: 'pointer',
+    userSelect: 'none', whiteSpace: 'nowrap',
+  },
+  checkbox: {
+    width: '15px', height: '15px', accentColor: teal, cursor: 'pointer',
+  },
+  checkboxHint: {
+    fontSize: '13px', color: muted,
   },
   disclaimer: { fontSize: '13px', color: muted, marginTop: '16px' },
 
