@@ -42,7 +42,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url, singlePageOnly } = req.body;
+  const { url, singlePageOnly, personas } = req.body;
+  const effectivePersonas = (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'];
+  const personaList = effectivePersonas.join(', ');
+  const personaSlash = effectivePersonas.join('/');
 
   if (!url) {
     return res.status(400).json({ error: 'Please provide a website URL.' });
@@ -135,7 +138,7 @@ Return a markdown-formatted transparency report:
 - Flag any pages that were blocked or failed to load
 
 STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2 & 3 only)
-Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: CEO, CRO, CFO.
+Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}.
 
 STEP 2 — FULL EXECUTIVE IMPACT TABLE (key: "fullTable")
 Return ONLY a markdown table with exactly these 5 columns in bold headers:
@@ -143,14 +146,14 @@ Return ONLY a markdown table with exactly these 5 columns in bold headers:
 - 5 rows, one per capability
 - Each cell: 1–2 short sentences, under 50 words
 - Life Without/With contrasts must be sharp, emotional, outcome-focused
-- Tailor pain points and Why Care to CEO/CRO/CFO priorities
+- Tailor pain points and Why Care to ${personaSlash} priorities
 - For the "How to Measure" and "Why Care" columns ONLY: separate each distinct point with " >> " so they can be displayed as individual bullet points. Example for How to Measure: "Track pipeline conversion weekly >> Review win/loss reports monthly >> Monitor deal velocity in CRM"
 
 STEP 3 — REFINED TOP 3 TABLE (key: "refinedTable")
 Evaluate all 5 rows and return ONLY the 3 most compelling as a markdown table using identical column formatting. No intro or explanation. Apply the same " >> " separator rule for the "How to Measure" and "Why Care" columns.
 
 STEP 4 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
-Return markdown-formatted objection handling for CEO, CRO, and CFO. For each persona, provide exactly 2 objections with responses. Use EXACTLY this format for every objection block:
+Return markdown-formatted objection handling for ${personaList}. For each persona, provide exactly 2 objections with responses. Use EXACTLY this format for every objection block:
 
 **[Persona Name]**
 
