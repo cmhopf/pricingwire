@@ -43,8 +43,13 @@ export default function ReportPage() {
 
         {/* Nav */}
         <nav style={s.nav}>
-          <span style={s.navLogo}>PricingWire</span>
-          {sourceUrl && <span style={s.navUrl}>{sourceUrl}</span>}
+          <div style={s.navTitleRow}>
+            <span style={s.navTitle}>Value Impact Assessment</span>
+            <span style={s.navBy}>&nbsp;&nbsp;by PricingWire</span>
+          </div>
+          {sourceUrl && (
+            <div style={s.navOrigin}>Assessment originated from: {sourceUrl}</div>
+          )}
         </nav>
 
         <main style={s.main}>
@@ -232,9 +237,11 @@ const bgSoft = '#f9fafb';
 
 const s = {
   page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
-  nav: { borderBottom: `1px solid ${border}`, padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: bg },
-  navLogo: { fontSize: '17px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
-  navUrl: { fontSize: '14px', color: muted },
+  nav: { borderBottom: `1px solid ${border}`, padding: '20px 40px', backgroundColor: bg, textAlign: 'center' },
+  navTitleRow: { display: 'flex', alignItems: 'baseline', justifyContent: 'center' },
+  navTitle: { fontFamily: serif, fontSize: '24px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
+  navBy: { fontFamily: font, fontSize: '14px', fontWeight: '400', color: '#9ca3af' },
+  navOrigin: { fontFamily: font, fontSize: '12px', fontWeight: '400', color: muted, marginTop: '5px' },
   main: { maxWidth: '880px', margin: '0 auto', padding: '48px 24px 80px', width: '100%', flex: 1 },
   loadingBox: { textAlign: 'center', padding: '40px 24px', border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bgSoft, marginBottom: '24px' },
   spinner: { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
