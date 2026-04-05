@@ -4,6 +4,51 @@ import { useRouter } from 'next/router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+// ── Assessment table helpers ───────────────────────────────────────────────────
+function parseMarkdownTable(markdown) {
+  if (!markdown) return null;
+  const lines = markdown.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 3) return null;
+  const parseRow = (line) =>
+    line.split('|').slice(1, -1).map(cell => cell.trim().replace(/\*\*/g, ''));
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(2).map(parseRow);
+  return { headers, rows };
+}
+
+function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
+  const table = parseMarkdownTable(markdown);
+  if (!table) return null;
+  return (
+    <div style={{ overflowX: 'auto' }} className={`md-content ${className}`}>
+      <table>
+        <thead>
+          <tr>
+            {table.headers.map((h, i) => <th key={i}>{h}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((cell, ci) => (
+                <td key={ci}>
+                  {bulletCols.includes(ci) ? (
+                    <ul style={{ paddingLeft: '16px', margin: 0 }}>
+                      {cell.split(' >> ').map(s => s.trim()).filter(Boolean).map((item, ii) => (
+                        <li key={ii} style={{ marginBottom: '5px', lineHeight: '1.5', fontSize: '14px' }}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function ReportPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -68,9 +113,7 @@ export default function ReportPage() {
           {deepAssessment && (
             <div style={s.mcvSection}>
               <h2 style={s.mcvHeading}>Your Most Compelling Value (MCV)</h2>
-              <div className="md-content mcv-table-wrap table-wrap">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.refinedTable}</ReactMarkdown>
-              </div>
+              <AssessmentTable markdown={deepAssessment.refinedTable} bulletCols={[3, 4]} className="mcv-table-wrap table-wrap" />
             </div>
           )}
 
@@ -137,9 +180,7 @@ export default function ReportPage() {
                   {/* Executive Impact Table — Top 5 */}
                   <div style={s.deepBlock}>
                     <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
-                    <div className="md-content table-wrap">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.fullTable}</ReactMarkdown>
-                    </div>
+                    <AssessmentTable markdown={deepAssessment.fullTable} bulletCols={[3, 4]} className="table-wrap" />
                   </div>
 
                   {/* Persona Objection Responses */}
