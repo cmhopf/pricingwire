@@ -55,7 +55,6 @@ const PRESET_PERSONAS = ['CEO', 'CRO', 'CFO', 'CMO', 'CIO', 'CTO'];
 
 export default function Home() {
   const [url, setUrl] = useState('');
-  const [targetAudience, setTargetAudience] = useState('');
   const [tone, setTone] = useState('Professional and persuasive');
   const [singlePageOnly, setSinglePageOnly] = useState(false);
   const [selectedPersonas, setSelectedPersonas] = useState(['CEO', 'CRO', 'CFO']);
@@ -92,7 +91,7 @@ export default function Home() {
     const quickPromise = fetch('/api/assess', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, targetAudience, tone }),
+      body: JSON.stringify({ url, tone }),
     });
 
     const deepPromise = fetch('/api/deep-assess', {
@@ -232,52 +231,42 @@ export default function Home() {
                   <span style={s.checkboxHint}>Skip subpage crawling — analyze only the submitted URL</span>
                 </div>
 
-                {/* 2. Target Audience | Tone */}
-                <div className="adv-grid" style={s.advGrid}>
-                  <div>
-                    <label style={s.label}>Target audience <span style={s.optional}>(optional)</span></label>
-                    <input
-                      type="text"
-                      value={targetAudience}
-                      onChange={e => setTargetAudience(e.target.value)}
-                      placeholder="e.g. VP of Sales at mid-market SaaS"
-                      style={s.input}
-                    />
-                  </div>
-                  <div>
-                    <label style={s.label}>Tone</label>
-                    <select value={tone} onChange={e => setTone(e.target.value)} style={s.input}>
-                      <option>Professional and persuasive</option>
-                      <option>Bold and direct</option>
-                      <option>Consultative and thoughtful</option>
-                      <option>Energetic and inspiring</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* 3. Personas */}
+                {/* 2. Target Personas */}
                 <div style={s.personaSection}>
-                  <label style={s.label}>Personas <span style={s.optional}>(select all that apply)</span></label>
+                  <label style={s.label}>
+                    Target Personas
+                    <span style={s.optional}> (select up to 4)</span>
+                    {activePersonas.length >= 4 && (
+                      <span style={s.personaMaxNote}> — maximum reached</span>
+                    )}
+                  </label>
                   <div style={s.personaGrid}>
-                    {PRESET_PERSONAS.map(p => (
-                      <label key={p} style={s.personaItem}>
-                        <input
-                          type="checkbox"
-                          checked={selectedPersonas.includes(p)}
-                          onChange={e => {
-                            setSelectedPersonas(prev =>
-                              e.target.checked ? [...prev, p] : prev.filter(x => x !== p)
-                            );
-                          }}
-                          style={s.checkbox}
-                        />
-                        {p}
-                      </label>
-                    ))}
-                    <label style={s.personaItem}>
+                    {PRESET_PERSONAS.map(p => {
+                      const isChecked = selectedPersonas.includes(p);
+                      const isDisabled = !isChecked && activePersonas.length >= 4;
+                      return (
+                        <label key={p} style={{ ...s.personaItem, opacity: isDisabled ? 0.38 : 1 }}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            disabled={isDisabled}
+                            onChange={e => {
+                              setSelectedPersonas(prev =>
+                                e.target.checked ? [...prev, p] : prev.filter(x => x !== p)
+                              );
+                            }}
+                            style={s.checkbox}
+                          />
+                          {p}
+                        </label>
+                      );
+                    })}
+                    {/* Other */}
+                    <label style={{ ...s.personaItem, opacity: (!otherPersonaChecked && activePersonas.length >= 4) ? 0.38 : 1 }}>
                       <input
                         type="checkbox"
                         checked={otherPersonaChecked}
+                        disabled={!otherPersonaChecked && activePersonas.length >= 4}
                         onChange={e => {
                           setOtherPersonaChecked(e.target.checked);
                           if (!e.target.checked) setOtherPersona('');
@@ -297,6 +286,17 @@ export default function Home() {
                       />
                     )}
                   </div>
+                </div>
+
+                {/* 3. Tone */}
+                <div style={s.personaSection}>
+                  <label style={s.label}>Tone</label>
+                  <select value={tone} onChange={e => setTone(e.target.value)} style={{ ...s.input, marginTop: '2px' }}>
+                    <option>Professional and persuasive</option>
+                    <option>Bold and direct</option>
+                    <option>Consultative and thoughtful</option>
+                    <option>Energetic and inspiring</option>
+                  </select>
                 </div>
                 </>
               )}
@@ -667,6 +667,9 @@ const s = {
     border: `1px solid ${border}`, borderRadius: '6px',
     fontFamily: font, color: ink, backgroundColor: bg,
     outline: 'none', width: '160px',
+  },
+  personaMaxNote: {
+    fontWeight: '500', color: '#d97706', fontSize: '13px',
   },
   disclaimer: { fontSize: '13px', color: muted, marginTop: '16px' },
 
