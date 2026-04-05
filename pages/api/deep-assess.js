@@ -143,9 +143,10 @@ Return ONLY a markdown table with exactly these 5 columns in bold headers:
 - Each cell: 1–2 short sentences, under 50 words
 - Life Without/With contrasts must be sharp, emotional, outcome-focused
 - Tailor pain points and Why Care to CEO/CRO/CFO priorities
+- For the "How to Measure" and "Why Care" columns ONLY: separate each distinct point with " >> " so they can be displayed as individual bullet points. Example for How to Measure: "Track pipeline conversion weekly >> Review win/loss reports monthly >> Monitor deal velocity in CRM"
 
 STEP 3 — REFINED TOP 3 TABLE (key: "refinedTable")
-Evaluate all 5 rows and return ONLY the 3 most compelling as a markdown table using identical column formatting. No intro or explanation.
+Evaluate all 5 rows and return ONLY the 3 most compelling as a markdown table using identical column formatting. No intro or explanation. Apply the same " >> " separator rule for the "How to Measure" and "Why Care" columns.
 
 STEP 4 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
 Return markdown-formatted objection handling for CEO, CRO, and CFO. For each persona, provide exactly 2 objections with responses. Use EXACTLY this format for every objection block:
