@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { assessment, deepAssessment, url } = req.body;
+  const { assessment, deepAssessment, url, personas } = req.body;
 
   if (!assessment) {
     return res.status(400).json({ error: 'No assessment data provided.' });
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       url,
       assessment,
       deepAssessment: deepAssessment || null,
+      personas: (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'],
       createdAt: new Date().toISOString(),
     };
 
