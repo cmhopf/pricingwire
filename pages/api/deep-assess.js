@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url } = req.body;
+  const { url, singlePageOnly } = req.body;
 
   if (!url) {
     return res.status(400).json({ error: 'Please provide a website URL.' });
@@ -62,20 +62,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: `Could not access ${url}: ${err.message}` });
   }
 
-  // ── Step 2: Discover subpages ───────────────────────────────────────
-  const allLinks = extractLinks(homepageHtml, url);
-
-  const priorityKeywords = ['product', 'solution', 'feature', 'about', 'pricing', 'platform', 'why', 'how', 'benefit', 'customer', 'case', 'use'];
-  const scored = allLinks.map(link => {
-    const lower = link.toLowerCase();
-    const score = priorityKeywords.reduce((s, kw) => s + (lower.includes(kw) ? 1 : 0), 0);
-    return { link, score };
-  });
-  scored.sort((a, b) => b.score - a.score);
-
-  const subpageUrls = scored.slice(0, 7).map(x => x.link);
-
-  // ── Step 3: Fetch subpages ──────────────────────────────────────────
+  // ── Step 2 & 3: Discover + fetch subpages (skipped if singlePageOnly) ──
   const pages = [{
     url,
     title: 'Homepage',
@@ -83,27 +70,41 @@ export default async function handler(req, res) {
     status: 'ok',
   }];
 
-  for (const subUrl of subpageUrls) {
-    try {
-      const r = await fetch(subUrl, { headers, signal: AbortSignal.timeout(6000) });
-      if (!r.ok) {
-        pages.push({ url: subUrl, title: subUrl, text: '', status: `blocked (HTTP ${r.status})` });
-        continue;
+  if (!singlePageOnly) {
+    const allLinks = extractLinks(homepageHtml, url);
+
+    const priorityKeywords = ['product', 'solution', 'feature', 'about', 'pricing', 'platform', 'why', 'how', 'benefit', 'customer', 'case', 'use'];
+    const scored = allLinks.map(link => {
+      const lower = link.toLowerCase();
+      const score = priorityKeywords.reduce((s, kw) => s + (lower.includes(kw) ? 1 : 0), 0);
+      return { link, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+
+    const subpageUrls = scored.slice(0, 7).map(x => x.link);
+
+    for (const subUrl of subpageUrls) {
+      try {
+        const r = await fetch(subUrl, { headers, signal: AbortSignal.timeout(6000) });
+        if (!r.ok) {
+          pages.push({ url: subUrl, title: subUrl, text: '', status: `blocked (HTTP ${r.status})` });
+          continue;
+        }
+        const html = await r.text();
+
+        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const title = titleMatch ? titleMatch[1].trim() : subUrl;
+
+        pages.push({
+          url: subUrl,
+          title,
+          text: extractText(html).substring(0, 1500),
+          status: 'ok',
+        });
+      } catch (err) {
+        const reason = err.name === 'TimeoutError' ? 'timed out' : 'failed to load';
+        pages.push({ url: subUrl, title: subUrl, text: '', status: reason });
       }
-      const html = await r.text();
-
-      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-      const title = titleMatch ? titleMatch[1].trim() : subUrl;
-
-      pages.push({
-        url: subUrl,
-        title,
-        text: extractText(html).substring(0, 1500),
-        status: 'ok',
-      });
-    } catch (err) {
-      const reason = err.name === 'TimeoutError' ? 'timed out' : 'failed to load';
-      pages.push({ url: subUrl, title: subUrl, text: '', status: reason });
     }
   }
 
@@ -128,7 +129,7 @@ Follow these exact instructions for each section:
 
 STEP 0 — SOURCE AUDIT (key: "sourceAudit")
 Return a markdown-formatted transparency report:
-- State the total number of unique subpages analyzed
+- State the total number of unique subpages analyzed${singlePageOnly ? ' — add exactly this note after the count: (user selected "Analyze this Page Only")' : ''}
 - A bulleted list of page titles/URLs assessed
 - For each page, one sentence on the specific insight discovered there
 - Flag any pages that were blocked or failed to load
