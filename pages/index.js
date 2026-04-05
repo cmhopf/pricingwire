@@ -51,11 +51,16 @@ function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
   );
 }
 
+const PRESET_PERSONAS = ['CEO', 'CRO', 'CFO', 'CMO', 'CIO', 'CTO'];
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [tone, setTone] = useState('Professional and persuasive');
   const [singlePageOnly, setSinglePageOnly] = useState(false);
+  const [selectedPersonas, setSelectedPersonas] = useState(['CEO', 'CRO', 'CFO']);
+  const [otherPersonaChecked, setOtherPersonaChecked] = useState(false);
+  const [otherPersona, setOtherPersona] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deepLoading, setDeepLoading] = useState(false);
@@ -66,6 +71,11 @@ export default function Home() {
   const [shareId, setShareId] = useState(null);
   const [shareStatus, setShareStatus] = useState('idle');
   const [shareError, setShareError] = useState('');
+
+  const activePersonas = [
+    ...selectedPersonas,
+    ...(otherPersonaChecked && otherPersona.trim() ? [otherPersona.trim()] : []),
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,7 +98,7 @@ export default function Home() {
     const deepPromise = fetch('/api/deep-assess', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, singlePageOnly }),
+      body: JSON.stringify({ url, singlePageOnly, personas: activePersonas }),
     });
 
     quickPromise
@@ -118,6 +128,9 @@ export default function Home() {
     setShareError('');
     setUrl('');
     setSinglePageOnly(false);
+    setSelectedPersonas(['CEO', 'CRO', 'CFO']);
+    setOtherPersonaChecked(false);
+    setOtherPersona('');
     window.scrollTo(0, 0);
   };
 
@@ -127,7 +140,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessment, deepAssessment, url }),
+        body: JSON.stringify({ assessment, deepAssessment, url, personas: activePersonas }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -205,6 +218,21 @@ export default function Home() {
 
               {showAdvanced && (
                 <>
+                {/* 1. Analyze this Page Only */}
+                <div style={s.checkboxRow}>
+                  <label style={s.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={singlePageOnly}
+                      onChange={e => setSinglePageOnly(e.target.checked)}
+                      style={s.checkbox}
+                    />
+                    Analyze this Page Only
+                  </label>
+                  <span style={s.checkboxHint}>Skip subpage crawling — analyze only the submitted URL</span>
+                </div>
+
+                {/* 2. Target Audience | Tone */}
                 <div className="adv-grid" style={s.advGrid}>
                   <div>
                     <label style={s.label}>Target audience <span style={s.optional}>(optional)</span></label>
@@ -226,17 +254,49 @@ export default function Home() {
                     </select>
                   </div>
                 </div>
-                <div style={s.checkboxRow}>
-                  <label style={s.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={singlePageOnly}
-                      onChange={e => setSinglePageOnly(e.target.checked)}
-                      style={s.checkbox}
-                    />
-                    Analyze this Page Only
-                  </label>
-                  <span style={s.checkboxHint}>Skip subpage crawling — analyze only the submitted URL</span>
+
+                {/* 3. Personas */}
+                <div style={s.personaSection}>
+                  <label style={s.label}>Personas <span style={s.optional}>(select all that apply)</span></label>
+                  <div style={s.personaGrid}>
+                    {PRESET_PERSONAS.map(p => (
+                      <label key={p} style={s.personaItem}>
+                        <input
+                          type="checkbox"
+                          checked={selectedPersonas.includes(p)}
+                          onChange={e => {
+                            setSelectedPersonas(prev =>
+                              e.target.checked ? [...prev, p] : prev.filter(x => x !== p)
+                            );
+                          }}
+                          style={s.checkbox}
+                        />
+                        {p}
+                      </label>
+                    ))}
+                    <label style={s.personaItem}>
+                      <input
+                        type="checkbox"
+                        checked={otherPersonaChecked}
+                        onChange={e => {
+                          setOtherPersonaChecked(e.target.checked);
+                          if (!e.target.checked) setOtherPersona('');
+                        }}
+                        style={s.checkbox}
+                      />
+                      Other:
+                    </label>
+                    {otherPersonaChecked && (
+                      <input
+                        type="text"
+                        value={otherPersona}
+                        onChange={e => setOtherPersona(e.target.value)}
+                        placeholder="e.g. VP Sales"
+                        style={s.personaOtherInput}
+                        maxLength={40}
+                      />
+                    )}
+                  </div>
                 </div>
                 </>
               )}
@@ -276,7 +336,7 @@ export default function Home() {
               {/* Deep-Dive Header */}
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
-                <p style={s.deepSubtitle}>Multi-page analysis · CEO · CRO · CFO</p>
+                <p style={s.deepSubtitle}>Multi-page analysis · {activePersonas.join(' · ')}</p>
               </div>
 
               {/* Company Name + Value Headline + Company Overview */}
@@ -338,7 +398,7 @@ export default function Home() {
                   {/* Persona Objection Responses */}
                   <div style={s.deepBlock}>
                     <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
-                    <p style={s.deepNote}>Anticipating the top objections from CEO, CRO, and CFO — with sharp, confident responses.</p>
+                    <p style={s.deepNote}>Anticipating the top objections from {activePersonas.join(', ')} — with sharp, confident responses.</p>
                     <div className="md-content">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.personaObjections}</ReactMarkdown>
                     </div>
@@ -577,6 +637,7 @@ const s = {
   checkboxRow: {
     display: 'flex', alignItems: 'center', gap: '10px',
     paddingTop: '14px', marginBottom: '4px',
+    borderTop: `1px solid ${border}`,
   },
   checkboxLabel: {
     display: 'flex', alignItems: 'center', gap: '7px',
@@ -588,6 +649,24 @@ const s = {
   },
   checkboxHint: {
     fontSize: '13px', color: muted,
+  },
+  personaSection: {
+    paddingTop: '16px', borderTop: `1px solid ${border}`, marginBottom: '4px',
+  },
+  personaGrid: {
+    display: 'flex', flexWrap: 'wrap', gap: '12px',
+    marginTop: '10px', alignItems: 'center',
+  },
+  personaItem: {
+    display: 'flex', alignItems: 'center', gap: '6px',
+    fontSize: '14px', fontWeight: '500', color: ink,
+    cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
+  },
+  personaOtherInput: {
+    padding: '5px 10px', fontSize: '14px',
+    border: `1px solid ${border}`, borderRadius: '6px',
+    fontFamily: font, color: ink, backgroundColor: bg,
+    outline: 'none', width: '160px',
   },
   disclaimer: { fontSize: '13px', color: muted, marginTop: '16px' },
 
