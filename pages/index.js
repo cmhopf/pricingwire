@@ -780,7 +780,7 @@ const s = {
   gatePrivacy: { fontSize: '13px', color: muted, marginTop: '4px' },
   gateError: { color: '#b91c1c', fontSize: '14px', marginTop: '12px' },
 
-  actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px' },
+  actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px', marginBottom: '32px' },
   shareLinkBox: { width: '100%', maxWidth: '560px', border: '1px solid #99f6e4', borderRadius: '10px', padding: '18px 20px', backgroundColor: '#f0fdf9' },
   shareLinkLabel: { fontSize: '15px', fontWeight: '600', color: '#0f766e', marginBottom: '10px' },
   shareLinkRow: { display: 'flex', gap: '8px', alignItems: 'center' },
