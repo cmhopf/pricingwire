@@ -3,58 +3,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-// ── Assessment table helpers ───────────────────────────────────────────────────
-function parseMarkdownTable(markdown) {
-  if (!markdown) return null;
-  const lines = markdown.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 3) return null;
-  const parseRow = (line) =>
-    line.split('|').slice(1, -1).map(cell => cell.trim().replace(/\*\*/g, ''));
-  const headers = parseRow(lines[0]);
-  const rows = lines.slice(2).map(parseRow);
-  return { headers, rows };
-}
-
-// ── Slice a markdown table to the first n data rows ───────────────────────────
-function sliceMarkdownTable(markdown, n) {
-  if (!markdown) return markdown;
-  const lines = markdown.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 3) return markdown;
-  // lines[0] = header row, lines[1] = separator, lines[2+] = data rows
-  return [lines[0], lines[1], ...lines.slice(2, 2 + n)].join('\n');
-}
-
-function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
-  const table = parseMarkdownTable(markdown);
-  if (!table) return null;
-  return (
-    <div style={{ overflowX: 'auto' }} className={`md-content ${className}`}>
-      <table>
-        <thead>
-          <tr>{table.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
-        </thead>
-        <tbody>
-          {table.rows.map((row, ri) => (
-            <tr key={ri}>
-              {row.map((cell, ci) => (
-                <td key={ci}>
-                  {bulletCols.includes(ci) ? (
-                    <ul style={{ paddingLeft: '16px', margin: 0 }}>
-                      {cell.split(' >> ').map(s => s.trim()).filter(Boolean).map((item, ii) => (
-                        <li key={ii} style={{ marginBottom: '5px', lineHeight: '1.5', fontSize: '14px' }}>{item}</li>
-                      ))}
-                    </ul>
-                  ) : cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+import { AssessmentTable, sliceMarkdownTable } from '../../lib/tableHelpers';
+import { font, serif, teal, ink, body, muted, border, bg, bgSoft } from '../../lib/designTokens';
 
 export default function ReportPage() {
   const router = useRouter();
@@ -195,7 +145,7 @@ export default function ReportPage() {
           )}
 
           {/* ── VALUE STORY ── */}
-          {analysis && analysis.valueStory && (
+          {analysis && analysis.storySituation && (
             <div style={s.storyWrap}>
 
               <div style={s.storyHeader}>
@@ -207,7 +157,7 @@ export default function ReportPage() {
                 <div style={s.deepBlockLabel}>🧭 Situation</div>
                 <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.situation}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storySituation}</ReactMarkdown>
                 </div>
               </div>
 
@@ -215,7 +165,7 @@ export default function ReportPage() {
                 <div style={s.deepBlockLabel}>⚠️ Risks</div>
                 <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.risks}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyRisks}</ReactMarkdown>
                 </div>
               </div>
 
@@ -223,7 +173,7 @@ export default function ReportPage() {
                 <div style={s.deepBlockLabel}>💡 Opportunity</div>
                 <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.opportunity}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyOpportunity}</ReactMarkdown>
                 </div>
               </div>
 
@@ -232,10 +182,10 @@ export default function ReportPage() {
                 <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
                 <div className="payoff-grid" style={s.payoffGrid}>
                   {[
-                    { period: 'Within 1 Month',       content: analysis.valueStory.payoff?.month1 },
-                    { period: 'Within 3 Months',      content: analysis.valueStory.payoff?.month3 },
-                    { period: 'Within 6 Months',      content: analysis.valueStory.payoff?.month6 },
-                    { period: '6+ Months and Beyond', content: analysis.valueStory.payoff?.beyond },
+                    { period: 'Within 1 Month',       content: analysis.payoffMonth1 },
+                    { period: 'Within 3 Months',      content: analysis.payoffMonth3 },
+                    { period: 'Within 6 Months',      content: analysis.payoffMonth6 },
+                    { period: '6+ Months and Beyond', content: analysis.payoffBeyond },
                   ].map(({ period, content }, i) => (
                     <div key={i} style={{
                       ...s.payoffCell,
@@ -282,51 +232,12 @@ export default function ReportPage() {
 
       </div>
 
-      <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .md-content p { font-size: 16px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
-        .md-content p:last-child { margin-bottom: 0; }
-        .md-content ul { padding-left: 20px; margin-bottom: 12px; }
-        .md-content li { font-size: 16px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
-        .md-content strong { color: #111827; font-weight: 600; }
-        .md-content h3, .md-content h4 { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: #111827; margin: 20px 0 8px; }
-        .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
-
-        .table-wrap { overflow-x: auto; }
-        .md-content table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
-        .md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-        .md-content th strong { color: #fff; font-weight: 600; }
-        .md-content td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: top; line-height: 1.6; color: #374151; }
-        .md-content tr:last-child td { border-bottom: none; }
-        .md-content tr:nth-child(even) td { background: #fafafa; }
-        .md-content tr:hover td { background: #f0fdf9; }
-
-        .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
-        .block-md p:last-child { margin-bottom: 0; }
-        .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
-        .block-md li { font-size: 15px; line-height: 1.65; color: #374151; margin-bottom: 6px; }
-
-        @media (max-width: 680px) {
-          .grid-2 { grid-template-columns: 1fr !important; }
-          .payoff-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </>
   );
 }
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const font = "'DM Sans', -apple-system, sans-serif";
-const serif = "'DM Serif Display', Georgia, serif";
-const teal = '#0d9488';
-const ink = '#111827';
-const body = '#374151';
-const muted = '#6b7280';
-const border = '#e5e7eb';
-const bg = '#ffffff';
-const bgSoft = '#f9fafb';
+// ── Style objects ──────────────────────────────────────────────────────────────
 
 const s = {
   page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
