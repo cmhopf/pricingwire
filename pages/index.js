@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -86,6 +86,8 @@ export default function Home() {
   const [valueStory, setValueStory] = useState(null);
   const [vsLoading, setVsLoading] = useState(false);
   const [vsError, setVsError] = useState('');
+  const vsAbortRef = React.useRef(null);
+  const vsTimeoutRef = React.useRef(null);
 
   const activePersonas = [
     ...selectedPersonas,
@@ -180,11 +182,19 @@ export default function Home() {
     e.preventDefault();
     setVsLoading(true);
     setVsError('');
+    const controller = new AbortController();
+    vsAbortRef.current = controller;
+    let timedOut = false;
+    vsTimeoutRef.current = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 45000);
     try {
       const r = await fetch('/api/value-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ analysis, personas: activePersonas, tone }),
+        signal: controller.signal,
       });
       if (!r.ok) {
         let msg = `Server error (${r.status}) — please try again.`;
@@ -199,8 +209,14 @@ export default function Home() {
       if (data.error) throw new Error(data.error);
       setValueStory(data);
     } catch (err) {
-      setVsError(err.message || 'Something went wrong. Please try again.');
+      if (err.name === 'AbortError' && timedOut) {
+        setVsError('TIMEOUT');
+      } else if (err.name !== 'AbortError') {
+        setVsError(err.message || 'Something went wrong. Please try again.');
+      }
     } finally {
+      clearTimeout(vsTimeoutRef.current);
+      vsAbortRef.current = null;
       setVsLoading(false);
     }
   };
@@ -486,7 +502,17 @@ export default function Home() {
                   </button>
                 </form>
                 <p style={s.gatePrivacy}>No spam — only used to unlock your Value Story.</p>
-                {vsError && <p style={s.gateError}>⚠️ {vsError}</p>}
+                {vsError && (
+                  vsError === 'TIMEOUT'
+                    ? <p style={s.gateError}>
+                        The value details exceed this tool&apos;s current complexity threshold.{' '}
+                        <a href="https://pricingwire.com/contact" target="_blank" rel="noreferrer" style={{ color: '#b91c1c' }}>
+                          Contact Chris Hopf here
+                        </a>{' '}
+                        to discuss further.
+                      </p>
+                    : <p style={s.gateError}>⚠️ {vsError}</p>
+                )}
               </div>
             </div>
           )}
@@ -779,6 +805,7 @@ const s = {
   gateBtn: { padding: '10px 22px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap' },
   gatePrivacy: { fontSize: '13px', color: muted, marginTop: '4px' },
   gateError: { color: '#b91c1c', fontSize: '14px', marginTop: '12px' },
+  cancelBtn: { marginTop: '16px', padding: '7px 18px', backgroundColor: 'transparent', color: muted, border: `1px solid ${border}`, borderRadius: '6px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', fontFamily: font },
 
   actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px', marginBottom: '32px' },
   shareLinkBox: { width: '100%', maxWidth: '560px', border: '1px solid #99f6e4', borderRadius: '10px', padding: '18px 20px', backgroundColor: '#f0fdf9' },
