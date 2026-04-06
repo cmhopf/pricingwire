@@ -83,11 +83,7 @@ export default function Home() {
   const [shareStatus, setShareStatus] = useState('idle');
   const [shareError, setShareError] = useState('');
   const [emailInput, setEmailInput] = useState('');
-  const [valueStory, setValueStory] = useState(null);
-  const [vsLoading, setVsLoading] = useState(false);
-  const [vsError, setVsError] = useState('');
-  const vsAbortRef = React.useRef(null);
-  const vsTimeoutRef = React.useRef(null);
+  const [vsUnlocked, setVsUnlocked] = useState(false);
 
   const activePersonas = [
     ...selectedPersonas,
@@ -111,8 +107,7 @@ export default function Home() {
     setShareId(null);
     setShareStatus('idle');
     setShareError('');
-    setValueStory(null);
-    setVsError('');
+    setVsUnlocked(false);
 
     try {
       const r = await fetch('/api/analyze', {
@@ -142,8 +137,7 @@ export default function Home() {
     setOtherPersona('');
     setMcvCount(3);
     setEmailInput('');
-    setValueStory(null);
-    setVsError('');
+    setVsUnlocked(false);
     window.scrollTo(0, 0);
   };
 
@@ -153,12 +147,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          analysis: valueStory ? { ...analysis, ...valueStory } : analysis,
-          url,
-          personas: activePersonas,
-          mcvCount,
-        }),
+        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -178,47 +167,9 @@ export default function Home() {
     }
   };
 
-  const handleUnlock = async (e) => {
+  const handleUnlock = (e) => {
     e.preventDefault();
-    setVsLoading(true);
-    setVsError('');
-    const controller = new AbortController();
-    vsAbortRef.current = controller;
-    let timedOut = false;
-    vsTimeoutRef.current = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, 45000);
-    try {
-      const r = await fetch('/api/value-story', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis, personas: activePersonas, tone }),
-        signal: controller.signal,
-      });
-      if (!r.ok) {
-        let msg = `Server error (${r.status}) — please try again.`;
-        try {
-          const text = await r.text();
-          const errData = JSON.parse(text);
-          if (errData.error) msg = errData.error;
-        } catch { /* keep generic message */ }
-        throw new Error(msg);
-      }
-      const data = await r.json();
-      if (data.error) throw new Error(data.error);
-      setValueStory(data);
-    } catch (err) {
-      if (err.name === 'AbortError' && timedOut) {
-        setVsError('TIMEOUT');
-      } else if (err.name !== 'AbortError') {
-        setVsError(err.message || 'Something went wrong. Please try again.');
-      }
-    } finally {
-      clearTimeout(vsTimeoutRef.current);
-      vsAbortRef.current = null;
-      setVsLoading(false);
-    }
+    setVsUnlocked(true);
   };
 
   return (
@@ -400,7 +351,7 @@ export default function Home() {
               <div style={s.spinner} />
               <p style={s.loadingText}>{LOADING_STEPS[loadingStep].doing}</p>
               <p style={s.loadingNext}>Next: {LOADING_STEPS[loadingStep].next}</p>
-              <p style={s.loadingTiming}>Your thorough Assessment may require ~60–75 seconds.</p>
+              <p style={s.loadingTiming}>Your thorough Assessment may require ~60–90 seconds.</p>
             </div>
           )}
 
@@ -479,117 +430,101 @@ export default function Home() {
             </div>
           )}
 
-          {/* ── EMAIL GATE — shown after main report, before Value Story is unlocked ── */}
-          {analysis && !valueStory && !vsLoading && (
-            <div style={s.gateWrap}>
-              <div style={s.gateInner}>
-                <div style={s.gateLock}>🔓</div>
-                <h2 style={s.gateTitle}>Unlock Your Value Story</h2>
-                <p style={s.gateSub}>
-                  Get a deeper narrative — Situation, Risks, Opportunity, and a month-by-month Payoff timeline — tailored to {activePersonas.join(', ')}.
-                </p>
-                <form onSubmit={handleUnlock} style={s.gateForm}>
-                  <input
-                    type="email"
-                    required
-                    value={emailInput}
-                    onChange={e => setEmailInput(e.target.value)}
-                    placeholder="Your work email"
-                    style={s.gateInput}
-                  />
-                  <button type="submit" style={s.gateBtn}>
-                    Unlock Now →
-                  </button>
-                </form>
-                <p style={s.gatePrivacy}>No spam — only used to unlock your Value Story.</p>
-                {vsError && (
-                  vsError === 'TIMEOUT'
-                    ? <p style={s.gateError}>
-                        The value details exceed this tool&apos;s current complexity threshold.{' '}
-                        <a href="https://pricingwire.com/contact" target="_blank" rel="noreferrer" style={{ color: '#b91c1c' }}>
-                          Contact Chris Hopf here
-                        </a>{' '}
-                        to discuss further.
-                      </p>
-                    : <p style={s.gateError}>⚠️ {vsError}</p>
-                )}
-              </div>
-            </div>
-          )}
+          {/* ── VALUE STORY (blur-gated until email unlock) ── */}
+          {analysis && analysis.storySituation && (
+            <div style={{ position: 'relative', marginBottom: '24px' }}>
 
-          {/* ── VALUE STORY LOADING ── */}
-          {vsLoading && (
-            <div style={s.loadingBox}>
-              <div style={s.spinner} />
-              <p style={s.loadingText}>Generating your Value Story…</p>
-              <p style={s.loadingNext}>Building Situation · Risks · Opportunity · Payoff</p>
-              <p style={s.loadingTiming}>This takes about 20–30 seconds.</p>
-            </div>
-          )}
-
-          {/* ── VALUE STORY (unlocked) ── */}
-          {analysis && valueStory && (
-            <div style={s.storyWrap}>
-
-              <div style={s.storyHeader}>
-                <span style={s.storyPill}>Value Story</span>
-                <p style={s.storySubtitle}>Situation · Risks · Opportunity · Payoff</p>
-              </div>
-
-              {/* Situation */}
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🧭 Situation</div>
-                <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storySituation}</ReactMarkdown>
+              {/* Blurred content layer */}
+              <div style={{
+                ...s.storyWrap,
+                marginBottom: 0,
+                filter: vsUnlocked ? 'none' : 'blur(5px)',
+                userSelect: vsUnlocked ? 'auto' : 'none',
+                pointerEvents: vsUnlocked ? 'auto' : 'none',
+                transition: 'filter 0.5s ease',
+              }}>
+                <div style={s.storyHeader}>
+                  <span style={s.storyPill}>Value Story</span>
+                  <p style={s.storySubtitle}>Situation · Risks · Opportunity · Payoff</p>
                 </div>
-              </div>
 
-              {/* Risks */}
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>⚠️ Risks</div>
-                <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storyRisks}</ReactMarkdown>
+                <div style={s.deepBlock}>
+                  <div style={s.deepBlockLabel}>🧭 Situation</div>
+                  <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
+                  <div className="md-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storySituation}</ReactMarkdown>
+                  </div>
                 </div>
-              </div>
 
-              {/* Opportunity */}
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>💡 Opportunity</div>
-                <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storyOpportunity}</ReactMarkdown>
+                <div style={s.deepBlock}>
+                  <div style={s.deepBlockLabel}>⚠️ Risks</div>
+                  <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
+                  <div className="md-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyRisks}</ReactMarkdown>
+                  </div>
                 </div>
-              </div>
 
-              {/* Payoff */}
-              <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
-                <div style={s.deepBlockLabel}>📈 Payoff</div>
-                <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
-                <div className="payoff-grid" style={s.payoffGrid}>
-                  {[
-                    { period: 'Within 1 Month',       content: valueStory.payoffMonth1 },
-                    { period: 'Within 3 Months',      content: valueStory.payoffMonth3 },
-                    { period: 'Within 6 Months',      content: valueStory.payoffMonth6 },
-                    { period: '6+ Months and Beyond', content: valueStory.payoffBeyond },
-                  ].map(({ period, content }, i) => (
-                    <div key={i} style={{
-                      ...s.payoffCell,
-                      borderRight:  i % 2 === 0 ? `1px solid ${border}` : 'none',
-                      borderBottom: i < 2        ? `1px solid ${border}` : 'none',
-                    }}>
-                      <div style={s.payoffPeriod}>{period}</div>
-                      <div className="md-content">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                <div style={s.deepBlock}>
+                  <div style={s.deepBlockLabel}>💡 Opportunity</div>
+                  <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
+                  <div className="md-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyOpportunity}</ReactMarkdown>
+                  </div>
+                </div>
+
+                <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
+                  <div style={s.deepBlockLabel}>📈 Payoff</div>
+                  <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
+                  <div className="payoff-grid" style={s.payoffGrid}>
+                    {[
+                      { period: 'Within 1 Month',       content: analysis.payoffMonth1 },
+                      { period: 'Within 3 Months',      content: analysis.payoffMonth3 },
+                      { period: 'Within 6 Months',      content: analysis.payoffMonth6 },
+                      { period: '6+ Months and Beyond', content: analysis.payoffBeyond },
+                    ].map(({ period, content }, i) => (
+                      <div key={i} style={{
+                        ...s.payoffCell,
+                        borderRight:  i % 2 === 0 ? `1px solid ${border}` : 'none',
+                        borderBottom: i < 2        ? `1px solid ${border}` : 'none',
+                      }}>
+                        <div style={s.payoffPeriod}>{period}</div>
+                        <div className="md-content">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 
+              {/* Gate overlay — disappears on unlock */}
+              {!vsUnlocked && (
+                <div style={s.blurOverlay}>
+                  <div style={s.blurGate}>
+                    <div style={s.gateLock}>🔓</div>
+                    <h2 style={s.gateTitle}>Unlock Your Value Story</h2>
+                    <p style={s.gateSub}>
+                      Get the full narrative — Situation, Risks, Opportunity, and a month-by-month Payoff timeline tailored to {activePersonas.join(', ')}.
+                    </p>
+                    <form onSubmit={handleUnlock} style={s.gateForm}>
+                      <input
+                        type="email"
+                        required
+                        value={emailInput}
+                        onChange={e => setEmailInput(e.target.value)}
+                        placeholder="Your work email"
+                        style={s.gateInput}
+                      />
+                      <button type="submit" style={s.gateBtn}>Unlock Now →</button>
+                    </form>
+                    <p style={s.gatePrivacy}>No spam — only used to unlock your Value Story.</p>
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
+
 
           {/* ── ACTIONS ── */}
           {analysis && !loading && (
@@ -795,8 +730,10 @@ const s = {
 
   auditWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px', animation: 'fadeUp 0.4s ease forwards' },
 
-  gateWrap: { border: `1px solid #99f6e4`, borderRadius: '12px', backgroundColor: '#f0fdf9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '44px 32px', textAlign: 'center', animation: 'fadeUp 0.4s ease forwards' },
-  gateInner: { maxWidth: '460px', margin: '0 auto' },
+  gateWrap: {},
+  gateInner: {},
+  blurOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.75)', borderRadius: '12px', padding: '24px' },
+  blurGate: { maxWidth: '460px', width: '100%', textAlign: 'center', backgroundColor: bg, border: `1px solid #99f6e4`, borderRadius: '12px', padding: '36px 32px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' },
   gateLock: { fontSize: '32px', marginBottom: '16px' },
   gateTitle: { fontFamily: serif, fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: '400', color: ink, marginBottom: '12px', letterSpacing: '-0.3px' },
   gateSub: { fontSize: '16px', color: body, lineHeight: '1.7', marginBottom: '24px' },
@@ -805,7 +742,6 @@ const s = {
   gateBtn: { padding: '10px 22px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap' },
   gatePrivacy: { fontSize: '13px', color: muted, marginTop: '4px' },
   gateError: { color: '#b91c1c', fontSize: '14px', marginTop: '12px' },
-  cancelBtn: { marginTop: '16px', padding: '7px 18px', backgroundColor: 'transparent', color: muted, border: `1px solid ${border}`, borderRadius: '6px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', fontFamily: font },
 
   actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px', marginBottom: '32px' },
   shareLinkBox: { width: '100%', maxWidth: '560px', border: '1px solid #99f6e4', borderRadius: '10px', padding: '18px 20px', backgroundColor: '#f0fdf9' },
