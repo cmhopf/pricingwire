@@ -197,7 +197,7 @@ export default function Home() {
                   type="url"
                   value={url}
                   onChange={e => setUrl(e.target.value)}
-                  placeholder="https://yourcompany.com"
+                  placeholder="https://..."
                   required
                   style={s.input}
                 />
@@ -286,18 +286,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* 3. Tone */}
-                <div style={s.personaSection}>
-                  <label style={s.label}>Tone</label>
-                  <select value={tone} onChange={e => setTone(e.target.value)} style={{ ...s.input, marginTop: '2px' }}>
-                    <option>Professional and persuasive</option>
-                    <option>Bold and direct</option>
-                    <option>Consultative and thoughtful</option>
-                    <option>Energetic and inspiring</option>
-                  </select>
-                </div>
-
-                {/* 4. MCV Capability Count */}
+                {/* 3. MCV Capability Count */}
                 <div style={s.personaSection}>
                   <label style={s.label}>
                     Capabilities to Display
@@ -320,11 +309,25 @@ export default function Home() {
                   </div>
                   <p style={s.checkboxHint}>Controls how many capabilities appear in the Value Impact — MCV table</p>
                 </div>
+
+                {/* 4. Tone */}
+                <div style={s.personaSection}>
+                  <label style={s.label}>Tone</label>
+                  <select value={tone} onChange={e => setTone(e.target.value)} style={{ ...s.input, marginTop: '2px' }}>
+                    <option>Professional and persuasive</option>
+                    <option>Bold and direct</option>
+                    <option>Consultative and thoughtful</option>
+                    <option>Energetic and inspiring</option>
+                  </select>
+                </div>
                 </>
               )}
 
               <p style={s.disclaimer}>
                 By submitting a URL, you confirm you have permission to analyze that website&apos;s public content.
+              </p>
+              <p style={{ ...s.disclaimer, marginTop: '8px' }}>
+                While rare, some websites prevent analysis of their content.
               </p>
             </form>
           </div>
@@ -338,6 +341,7 @@ export default function Home() {
               <div style={s.spinner} />
               <p style={s.loadingText}>{LOADING_STEPS[loadingStep].doing}</p>
               <p style={s.loadingNext}>Next: {LOADING_STEPS[loadingStep].next}</p>
+              <p style={s.loadingTiming}>Your thorough Assessment may require ~40–50 seconds.</p>
             </div>
           )}
 
@@ -406,7 +410,7 @@ export default function Home() {
 
               {/* Persona Objection Responses */}
               <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
+                <div style={s.deepBlockLabel}>💬 Persona Objection Responses</div>
                 <p style={s.deepNote}>Anticipating the top objections from {activePersonas.join(', ')} — with sharp, confident responses.</p>
                 <div className="md-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections}</ReactMarkdown>
@@ -547,7 +551,7 @@ const bgSoft = '#f9fafb';
 
 const s = {
   page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
-  hero: { padding: '80px 40px 64px', textAlign: 'center', borderBottom: `1px solid ${border}`, backgroundColor: bg },
+  hero: { padding: '62px 40px 50px', textAlign: 'center', borderBottom: `1px solid ${border}`, backgroundColor: bg },
   heroEyebrow: { fontSize: '13px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', color: teal, marginBottom: '20px' },
   heroTitle: { fontFamily: serif, fontSize: 'clamp(38px, 5vw, 62px)', fontWeight: '400', color: ink, lineHeight: '1.15', marginBottom: '20px', letterSpacing: '-0.5px' },
   heroSub: { fontSize: '18px', color: body, lineHeight: '1.75', maxWidth: '480px', margin: '0 auto' },
@@ -583,6 +587,7 @@ const s = {
   spinner: { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
   loadingText: { fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px' },
   loadingNext: { fontSize: '13px', color: muted, marginTop: '6px' },
+  loadingTiming: { fontSize: '13px', color: muted, marginTop: '14px', paddingTop: '14px', borderTop: `1px solid ${border}` },
 
   errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
 
@@ -617,7 +622,7 @@ const s = {
   actionBtns: { display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' },
 
   footer: { borderTop: `1px solid ${border}`, padding: '40px 40px', textAlign: 'center', backgroundColor: bgSoft },
-  footerLogo: { fontSize: '16px', fontWeight: '700', color: ink, marginBottom: '8px' },
-  footerText: { fontSize: '15px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
-  footerMcv: { fontSize: '14px', color: muted, fontStyle: 'italic' },
+  footerLogo: { fontSize: '21px', fontWeight: '700', color: ink, marginBottom: '8px' },
+  footerText: { fontSize: '20px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
+  footerMcv: { fontSize: '18px', color: muted, fontStyle: 'italic' },
 };
