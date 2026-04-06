@@ -186,6 +186,15 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ analysis, personas: activePersonas, tone }),
       });
+      if (!r.ok) {
+        let msg = `Server error (${r.status}) — please try again.`;
+        try {
+          const text = await r.text();
+          const errData = JSON.parse(text);
+          if (errData.error) msg = errData.error;
+        } catch { /* keep generic message */ }
+        throw new Error(msg);
+      }
       const data = await r.json();
       if (data.error) throw new Error(data.error);
       setValueStory(data);
@@ -375,7 +384,7 @@ export default function Home() {
               <div style={s.spinner} />
               <p style={s.loadingText}>{LOADING_STEPS[loadingStep].doing}</p>
               <p style={s.loadingNext}>Next: {LOADING_STEPS[loadingStep].next}</p>
-              <p style={s.loadingTiming}>Your thorough Assessment may require ~40–50 seconds.</p>
+              <p style={s.loadingTiming}>Your thorough Assessment may require ~60–75 seconds.</p>
             </div>
           )}
 
@@ -556,16 +565,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* ── SOURCE AUDIT ── */}
-          {analysis && (
-            <div style={s.auditWrap}>
-              <div style={s.deepBlockLabel}>🔍 Source Audit</div>
-              <div className="md-content">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
-              </div>
-            </div>
-          )}
-
           {/* ── ACTIONS ── */}
           {analysis && !loading && (
             <div style={s.actionsWrap}>
@@ -597,8 +596,8 @@ export default function Home() {
                 </p>
               )}
 
-              <div style={s.actionBtns}>
-                {!shareId && (
+              {!shareId && (
+                <div style={s.actionBtns}>
                   <button
                     onClick={handleShare}
                     disabled={shareStatus === 'saving'}
@@ -611,12 +610,19 @@ export default function Home() {
                   >
                     {shareStatus === 'saving' ? 'Saving…' : '🔗 Generate Share Link'}
                   </button>
-                )}
-                <button onClick={handleReset} style={s.btnOutline}>
-                  ↑ Run Another Assessment
-                </button>
-              </div>
+                </div>
+              )}
 
+            </div>
+          )}
+
+          {/* ── SOURCE AUDIT ── */}
+          {analysis && (
+            <div style={s.auditWrap}>
+              <div style={s.deepBlockLabel}>🔍 Source Audit</div>
+              <div className="md-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+              </div>
             </div>
           )}
 
