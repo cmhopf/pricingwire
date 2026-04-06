@@ -42,21 +42,30 @@ ${analysis.fullTable}
 
 Return ONLY a valid JSON object with exactly these 7 keys: storySituation, storyRisks, storyOpportunity, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond.
 
+VOICE RULES — apply across every section without exception:
+- Write in second person ("you", "your") throughout — speak directly to the ${personaSlash} reading this
+- Situation may open bullets with light social-proof framing ("Most [persona]s in your space are navigating...") before shifting to direct "you" language — this makes observations feel validated, not assumed
+- Risks use direct "If you..." / "Without this..." / "The longer you wait..." framing to create honest urgency
+- Opportunity uses "Today you..." → "With ${analysis.companyName}, you..." contrast per capability
+- Payoff uses commitment language: "In the first 30 days you will...", "By month 3 you'll see...", "Within 6 months you will have..."
+- Never use third-person ("they", "companies", "organizations") — always address the reader directly
+- Tone: ${effectiveTone}
+
 All values are markdown strings using bullet points (- prefix). Draw entirely from the analysis context above — never invent facts. Tailor everything to ${personaSlash}.
 
-"storySituation": 4–5 bullet points that demonstrate a clear-eyed understanding of the prospect's current reality — their existing approach, operational pressures, strategic environment, and the specific gaps or frustrations that make this problem worth solving. Write from the prospect's point of view, in a way that makes them feel seen and understood before any solution is mentioned.
+"storySituation": 4–5 bullet points. Open with 1–2 bullets using social-proof framing ("Most ${personaSlash}s in your space are dealing with...") to establish that this is a recognized, validated challenge — then shift to direct "you" language for the remaining bullets to make it personal. Cover their existing approach, operational pressures, strategic environment, and the specific gaps or frustrations that make this worth solving. The reader should feel clearly seen before any solution is mentioned.
 
-"storyRisks": 4–5 bullet points covering the specific consequences of not making this a top priority. Be concrete — include lost revenue, customer churn, competitive irrelevance, missed opportunities, and the compounding cost of delay.
+"storyRisks": 4–5 bullet points in direct second-person. Use "If you don't...", "Every quarter you delay...", "Without this, you risk..." framing. Be concrete — address lost revenue, customer churn, competitive irrelevance, missed opportunities, and the compounding cost of inaction specific to a ${personaSlash}.
 
-"storyOpportunity": 4–5 bullet points — one per top capability, ordered most compelling first (matching the rank order of the Value Impact Table). Each bullet must address all four dimensions in a single concise statement: the Capability itself, the current-state reality (Life Without), the transformed state (Life With), how success is measured (How to Measure), and why it matters to the buyer (Why Care). Pull all content directly from the Value Impact Table — do not invent new capabilities. Format each bullet so the capability name is bolded, followed by the contrast and payoff in plain prose. Example structure: "**[Capability]**: Today [life without]. With [company], [life with] — measured by [metric], which matters because [why care]."
+"storyOpportunity": 4–5 bullet points — one per top capability, ordered most compelling first (matching the rank order of the Value Impact Table). Each bullet must address all four dimensions in a single concise statement using second-person contrast: the Capability (bolded), the current-state reality in "you" language (Life Without), the transformed state in "you" language (Life With), how success is measured (How to Measure), and why it matters to this buyer (Why Care). Pull all content directly from the Value Impact Table — do not invent new capabilities. Example structure: "**[Capability]**: Today you [life without]. With ${analysis.companyName}, you [life with] — tracked by [metric], which means [why care for ${personaSlash}]."
 
-"payoffMonth1": 2–3 bullet points — specific quick wins and early leading indicators visible within 30 days.
+"payoffMonth1": 2–3 bullet points using commitment language — "In the first 30 days you will see...", "Within your first month you'll have...". Specific quick wins and early leading indicators the ${personaSlash} will be able to point to.
 
-"payoffMonth3": 2–3 bullet points — measurable progress and initial business impact within 90 days.
+"payoffMonth3": 2–3 bullet points — "By month 3 you'll see...", "Within 90 days you will have...". Measurable progress and initial business impact a ${personaSlash} can report upward.
 
-"payoffMonth6": 2–3 bullet points — significant ROI and outcomes becoming clearly visible within 6 months.
+"payoffMonth6": 2–3 bullet points — "Within 6 months you will have...", "By the half-year mark you'll be...". Significant ROI and outcomes that are clearly visible and defensible.
 
-"payoffBeyond": 2–3 bullet points — sustained competitive advantage and transformational results after 6 months.
+"payoffBeyond": 2–3 bullet points — "Beyond 6 months, you'll have built...", "Long-term, you will...". Sustained competitive advantage and transformational results that compound over time.
 
 CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no commentary outside the JSON.`;
 
