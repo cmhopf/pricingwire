@@ -16,6 +16,15 @@ function parseMarkdownTable(markdown) {
   return { headers, rows };
 }
 
+// ── Slice a markdown table to the first n data rows ───────────────────────────
+function sliceMarkdownTable(markdown, n) {
+  if (!markdown) return markdown;
+  const lines = markdown.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 3) return markdown;
+  // lines[0] = header row, lines[1] = separator, lines[2+] = data rows
+  return [lines[0], lines[1], ...lines.slice(2, 2 + n)].join('\n');
+}
+
 function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
   const table = parseMarkdownTable(markdown);
   if (!table) return null;
@@ -74,6 +83,11 @@ export default function ReportPage() {
   const sourceUrl = report?.url;
   const personas = report?.personas || ['CEO', 'CRO', 'CFO'];
 
+  // mcvCount: use saved value if present and valid, otherwise default to 3
+  const mcvCount = (report?.mcvCount && [3, 4, 5].includes(report.mcvCount))
+    ? report.mcvCount
+    : 3;
+
   return (
     <>
       <Head>
@@ -109,14 +123,6 @@ export default function ReportPage() {
           )}
 
           {error && <div style={s.errorBox}>⚠️ {error}</div>}
-
-          {/* ── YOUR MOST COMPELLING VALUE (MCV) ── */}
-          {analysis && (
-            <div style={s.mcvSection}>
-              <h2 style={s.mcvHeading}>Your Most Compelling Value (MCV)</h2>
-              <AssessmentTable markdown={analysis.refinedTable} bulletCols={[3, 4]} className="mcv-table-wrap table-wrap" />
-            </div>
-          )}
 
           {/* ── EXECUTIVE DEEP-DIVE ── */}
           {analysis && (
@@ -167,9 +173,14 @@ export default function ReportPage() {
 
               <div style={s.divider} />
 
+              {/* Value Impact — MCV Table (sliced to saved mcvCount) */}
               <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
-                <AssessmentTable markdown={analysis.fullTable} bulletCols={[3, 4]} className="table-wrap" />
+                <div style={s.deepBlockLabel}>📊 Value Impact — Most Compelling Value (MCV) — Top {mcvCount}</div>
+                <AssessmentTable
+                  markdown={sliceMarkdownTable(analysis.fullTable, mcvCount)}
+                  bulletCols={[3, 4]}
+                  className="table-wrap"
+                />
               </div>
 
               <div style={s.deepBlock}>
@@ -229,10 +240,6 @@ export default function ReportPage() {
         .md-content tr:nth-child(even) td { background: #fafafa; }
         .md-content tr:hover td { background: #f0fdf9; }
 
-        .mcv-table-wrap tr:nth-child(odd) td { background: #ffffff !important; }
-        .mcv-table-wrap tr:nth-child(even) td { background: #f9fafb !important; }
-        .mcv-table-wrap tr:hover td { background: #f5f5f5 !important; }
-
         .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
         .block-md p:last-child { margin-bottom: 0; }
         .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
@@ -269,9 +276,6 @@ const s = {
   spinner: { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
   loadingText: { fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px' },
   errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
-
-  mcvSection: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', padding: '32px' },
-  mcvHeading: { fontFamily: font, fontSize: '22px', fontWeight: '700', color: ink, marginBottom: '20px', letterSpacing: '-0.3px' },
 
   deepWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
   deepHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
