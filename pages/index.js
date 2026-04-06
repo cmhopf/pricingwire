@@ -82,6 +82,10 @@ export default function Home() {
   const [shareId, setShareId] = useState(null);
   const [shareStatus, setShareStatus] = useState('idle');
   const [shareError, setShareError] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [valueStory, setValueStory] = useState(null);
+  const [vsLoading, setVsLoading] = useState(false);
+  const [vsError, setVsError] = useState('');
 
   const activePersonas = [
     ...selectedPersonas,
@@ -105,6 +109,8 @@ export default function Home() {
     setShareId(null);
     setShareStatus('idle');
     setShareError('');
+    setValueStory(null);
+    setVsError('');
 
     try {
       const r = await fetch('/api/analyze', {
@@ -133,6 +139,9 @@ export default function Home() {
     setOtherPersonaChecked(false);
     setOtherPersona('');
     setMcvCount(3);
+    setEmailInput('');
+    setValueStory(null);
+    setVsError('');
     window.scrollTo(0, 0);
   };
 
@@ -142,7 +151,12 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount }),
+        body: JSON.stringify({
+          analysis: valueStory ? { ...analysis, ...valueStory } : analysis,
+          url,
+          personas: activePersonas,
+          mcvCount,
+        }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -159,6 +173,26 @@ export default function Home() {
       console.error('Share error:', err);
       setShareError(err.message || 'Unknown error');
       setShareStatus('error');
+    }
+  };
+
+  const handleUnlock = async (e) => {
+    e.preventDefault();
+    setVsLoading(true);
+    setVsError('');
+    try {
+      const r = await fetch('/api/value-story', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analysis, personas: activePersonas, tone }),
+      });
+      const data = await r.json();
+      if (data.error) throw new Error(data.error);
+      setValueStory(data);
+    } catch (err) {
+      setVsError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setVsLoading(false);
     }
   };
 
@@ -420,8 +454,46 @@ export default function Home() {
             </div>
           )}
 
-          {/* ── VALUE STORY ── */}
-          {analysis && analysis.valueStory && (
+          {/* ── EMAIL GATE — shown after main report, before Value Story is unlocked ── */}
+          {analysis && !valueStory && !vsLoading && (
+            <div style={s.gateWrap}>
+              <div style={s.gateInner}>
+                <div style={s.gateLock}>🔓</div>
+                <h2 style={s.gateTitle}>Unlock Your Value Story</h2>
+                <p style={s.gateSub}>
+                  Get a deeper narrative — Situation, Risks, Opportunity, and a month-by-month Payoff timeline — tailored to {activePersonas.join(', ')}.
+                </p>
+                <form onSubmit={handleUnlock} style={s.gateForm}>
+                  <input
+                    type="email"
+                    required
+                    value={emailInput}
+                    onChange={e => setEmailInput(e.target.value)}
+                    placeholder="Your work email"
+                    style={s.gateInput}
+                  />
+                  <button type="submit" style={s.gateBtn}>
+                    Unlock Now →
+                  </button>
+                </form>
+                <p style={s.gatePrivacy}>No spam — only used to unlock your Value Story.</p>
+                {vsError && <p style={s.gateError}>⚠️ {vsError}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* ── VALUE STORY LOADING ── */}
+          {vsLoading && (
+            <div style={s.loadingBox}>
+              <div style={s.spinner} />
+              <p style={s.loadingText}>Generating your Value Story…</p>
+              <p style={s.loadingNext}>Building Situation · Risks · Opportunity · Payoff</p>
+              <p style={s.loadingTiming}>This takes about 20–30 seconds.</p>
+            </div>
+          )}
+
+          {/* ── VALUE STORY (unlocked) ── */}
+          {analysis && valueStory && (
             <div style={s.storyWrap}>
 
               <div style={s.storyHeader}>
@@ -434,7 +506,7 @@ export default function Home() {
                 <div style={s.deepBlockLabel}>🧭 Situation</div>
                 <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.situation}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storySituation}</ReactMarkdown>
                 </div>
               </div>
 
@@ -443,7 +515,7 @@ export default function Home() {
                 <div style={s.deepBlockLabel}>⚠️ Risks</div>
                 <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.risks}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storyRisks}</ReactMarkdown>
                 </div>
               </div>
 
@@ -452,7 +524,7 @@ export default function Home() {
                 <div style={s.deepBlockLabel}>💡 Opportunity</div>
                 <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.opportunity}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{valueStory.storyOpportunity}</ReactMarkdown>
                 </div>
               </div>
 
@@ -462,15 +534,15 @@ export default function Home() {
                 <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
                 <div className="payoff-grid" style={s.payoffGrid}>
                   {[
-                    { period: 'Within 1 Month',      content: analysis.valueStory.payoff?.month1 },
-                    { period: 'Within 3 Months',     content: analysis.valueStory.payoff?.month3 },
-                    { period: 'Within 6 Months',     content: analysis.valueStory.payoff?.month6 },
-                    { period: '6+ Months and Beyond', content: analysis.valueStory.payoff?.beyond },
+                    { period: 'Within 1 Month',       content: valueStory.payoffMonth1 },
+                    { period: 'Within 3 Months',      content: valueStory.payoffMonth3 },
+                    { period: 'Within 6 Months',      content: valueStory.payoffMonth6 },
+                    { period: '6+ Months and Beyond', content: valueStory.payoffBeyond },
                   ].map(({ period, content }, i) => (
                     <div key={i} style={{
                       ...s.payoffCell,
-                      borderRight:   i % 2 === 0 ? `1px solid ${border}` : 'none',
-                      borderBottom:  i < 2        ? `1px solid ${border}` : 'none',
+                      borderRight:  i % 2 === 0 ? `1px solid ${border}` : 'none',
+                      borderBottom: i < 2        ? `1px solid ${border}` : 'none',
                     }}>
                       <div style={s.payoffPeriod}>{period}</div>
                       <div className="md-content">
@@ -690,6 +762,17 @@ const s = {
   payoffPeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '10px' },
 
   auditWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px', animation: 'fadeUp 0.4s ease forwards' },
+
+  gateWrap: { border: `1px solid #99f6e4`, borderRadius: '12px', backgroundColor: '#f0fdf9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '44px 32px', textAlign: 'center', animation: 'fadeUp 0.4s ease forwards' },
+  gateInner: { maxWidth: '460px', margin: '0 auto' },
+  gateLock: { fontSize: '32px', marginBottom: '16px' },
+  gateTitle: { fontFamily: serif, fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: '400', color: ink, marginBottom: '12px', letterSpacing: '-0.3px' },
+  gateSub: { fontSize: '16px', color: body, lineHeight: '1.7', marginBottom: '24px' },
+  gateForm: { display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '12px' },
+  gateInput: { flex: '1', minWidth: '220px', maxWidth: '280px', padding: '10px 14px', fontSize: '16px', border: `1px solid #5eead4`, borderRadius: '8px', fontFamily: font, color: ink, backgroundColor: bg, outline: 'none' },
+  gateBtn: { padding: '10px 22px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap' },
+  gatePrivacy: { fontSize: '13px', color: muted, marginTop: '4px' },
+  gateError: { color: '#b91c1c', fontSize: '14px', marginTop: '12px' },
 
   actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px' },
   shareLinkBox: { width: '100%', maxWidth: '560px', border: '1px solid #99f6e4', borderRadius: '10px', padding: '18px 20px', backgroundColor: '#f0fdf9' },
