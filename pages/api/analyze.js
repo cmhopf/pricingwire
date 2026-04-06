@@ -210,7 +210,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff.`;
 
-  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, refinedTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer.
+  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer.
 
 Tone for all written narrative content: ${effectiveTone}
 
@@ -228,22 +228,19 @@ Return a markdown-formatted transparency report:
 - For each page, one sentence on the specific insight discovered there
 - Flag any pages that were blocked or failed to load
 
-STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2, 3, and 5 only)
-Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}.
+STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2 and 3 only)
+Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}. Rank them in order from most compelling/impactful to least.
 
-STEP 2 — FULL EXECUTIVE IMPACT TABLE (key: "fullTable")
+STEP 2 — FULL VALUE IMPACT TABLE (key: "fullTable")
 Return ONLY a markdown table with exactly these 5 columns in bold headers:
 | **Capability** | **Life Without** | **Life With** | **How to Measure** | **Why Care** |
-- 5 rows, one per capability
+- Exactly 5 rows, one per capability, ordered most compelling first (row 1 = highest impact, row 5 = lowest)
 - Each cell: 1–2 short sentences, under 50 words
 - Life Without/With contrasts must be sharp, emotional, outcome-focused
 - Tailor pain points and Why Care to ${personaSlash} priorities
 - For the "How to Measure" and "Why Care" columns ONLY: separate each distinct point with " >> " so they can be displayed as individual bullet points. Example for How to Measure: "Track pipeline conversion weekly >> Review win/loss reports monthly >> Monitor deal velocity in CRM"
 
-STEP 3 — REFINED TOP 3 TABLE (key: "refinedTable")
-Evaluate all 5 rows and return ONLY the 3 most compelling as a markdown table using identical column formatting. No intro or explanation. Apply the same " >> " separator rule for the "How to Measure" and "Why Care" columns.
-
-STEP 4 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
+STEP 3 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
 Return markdown-formatted objection handling for ${personaList}. For each persona, provide exactly 2 objections with responses. Use EXACTLY this format for every objection block:
 
 **[Persona Name]**
@@ -260,13 +257,13 @@ Return markdown-formatted objection handling for ${personaList}. For each person
 - [One sentence response.]
 - [Optional third bullet — one sentence only if genuinely needed.]
 
-CRITICAL FORMATTING RULES FOR STEP 4:
+CRITICAL FORMATTING RULES FOR STEP 3:
 - The objection text in quotes MUST be wrapped in bold markdown: **"..."**
 - Leave exactly one blank line between the bolded objection and its bullet-point responses
 - Each bullet MUST be exactly one sentence — no run-ons, no semicolons joining two thoughts
 - Maximum 3 bullets per objection response
 
-STEP 5 — COMPANY PROFILE + VALUE STORY
+STEP 4 — COMPANY PROFILE + VALUE STORY
 Using all pages analyzed, return the following keys:
 - "companyName": The company name
 - "companyOverview": What this company does and who it serves. HARD LIMIT: 310 characters maximum — count every character and optimize wording to fit precisely within this limit.
@@ -276,7 +273,7 @@ Using all pages analyzed, return the following keys:
 - "whyNow": Array of EXACTLY 3 succinct urgency drivers
 - "targetBuyer": ONE sentence describing the ideal buyer persona — no semicolons splitting into multiple thoughts
 
-CRITICAL RULES FOR STEP 5 — violating any of these is unacceptable:
+CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 - companyOverview MUST be 310 characters or fewer — count every character carefully
 - whyBuy MUST contain EXACTLY 4 items — no more, no fewer
 - whyNow MUST contain EXACTLY 3 items — no more, no fewer
