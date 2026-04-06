@@ -2,58 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-// ── Assessment table helpers ───────────────────────────────────────────────────
-function parseMarkdownTable(markdown) {
-  if (!markdown) return null;
-  const lines = markdown.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 3) return null;
-  const parseRow = (line) =>
-    line.split('|').slice(1, -1).map(cell => cell.trim().replace(/\*\*/g, ''));
-  const headers = parseRow(lines[0]);
-  const rows = lines.slice(2).map(parseRow);
-  return { headers, rows };
-}
-
-// ── Slice a markdown table to the first n data rows ───────────────────────────
-function sliceMarkdownTable(markdown, n) {
-  if (!markdown) return markdown;
-  const lines = markdown.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 3) return markdown;
-  // lines[0] = header row, lines[1] = separator, lines[2+] = data rows
-  return [lines[0], lines[1], ...lines.slice(2, 2 + n)].join('\n');
-}
-
-function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
-  const table = parseMarkdownTable(markdown);
-  if (!table) return null;
-  return (
-    <div style={{ overflowX: 'auto' }} className={`md-content ${className}`}>
-      <table>
-        <thead>
-          <tr>{table.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
-        </thead>
-        <tbody>
-          {table.rows.map((row, ri) => (
-            <tr key={ri}>
-              {row.map((cell, ci) => (
-                <td key={ci}>
-                  {bulletCols.includes(ci) ? (
-                    <ul style={{ paddingLeft: '16px', margin: 0 }}>
-                      {cell.split(' >> ').map(s => s.trim()).filter(Boolean).map((item, ii) => (
-                        <li key={ii} style={{ marginBottom: '5px', lineHeight: '1.5', fontSize: '14px' }}>{item}</li>
-                      ))}
-                    </ul>
-                  ) : cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+import { AssessmentTable, sliceMarkdownTable } from '../lib/tableHelpers';
+import { font, serif, teal, ink, body, muted, border, bg, bgSoft } from '../lib/designTokens';
 
 // ── Loading step messages ──────────────────────────────────────────────────────
 const PRESET_PERSONAS = ['CEO', 'CRO', 'CFO', 'CMO', 'CIO', 'CTO'];
@@ -126,6 +76,7 @@ export default function Home() {
   };
 
   const handleReset = () => {
+    setShowAdvanced(false);
     setAnalysis(null);
     setShareId(null);
     setShareStatus('idle');
@@ -395,13 +346,13 @@ export default function Home() {
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
                   <ul style={s.ul}>
-                    {analysis.whyBuy.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
+                    {(analysis.whyBuy || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#d97706' }}>⚡ Why Now?</div>
                   <ul style={s.ul}>
-                    {analysis.whyNow.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
+                    {(analysis.whyNow || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
               </div>
@@ -600,60 +551,12 @@ export default function Home() {
 
       </div>
 
-      <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .md-content p { font-size: 16px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
-        .md-content p:last-child { margin-bottom: 0; }
-        .md-content ul { padding-left: 20px; margin-bottom: 12px; }
-        .md-content li { font-size: 16px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
-        .md-content strong { color: #111827; font-weight: 600; }
-        .md-content h3, .md-content h4 {
-          font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600;
-          color: #111827; margin: 20px 0 8px;
-        }
-        .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
-
-        .table-wrap { overflow-x: auto; }
-        .md-content table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
-        .md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-        .md-content th strong { color: #fff; font-weight: 600; }
-        .md-content td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: top; line-height: 1.6; color: #374151; }
-        .md-content tr:last-child td { border-bottom: none; }
-        .md-content tr:nth-child(even) td { background: #fafafa; }
-        .md-content tr:hover td { background: #f0fdf9; }
-
-        .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
-        .block-md p:last-child { margin-bottom: 0; }
-        .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
-        .block-md li { font-size: 15px; line-height: 1.65; color: #374151; margin-bottom: 6px; }
-
-        @media (max-width: 680px) {
-          .grid-2 { grid-template-columns: 1fr !important; }
-          .input-row { flex-direction: column !important; }
-          .payoff-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </>
   );
 }
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const font = "'DM Sans', -apple-system, sans-serif";
-const serif = "'DM Serif Display', Georgia, serif";
-const teal = '#0d9488';
-const ink = '#111827';
-const body = '#374151';
-const muted = '#6b7280';
-const border = '#e5e7eb';
-const bg = '#ffffff';
-const bgSoft = '#f9fafb';
+// ── Style objects ──────────────────────────────────────────────────────────────
 
 const s = {
   page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
