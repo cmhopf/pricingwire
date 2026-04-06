@@ -496,9 +496,8 @@ export default function Home() {
 
         {/* ── CTA BAND ── */}
         <div style={s.ctaBand}>
-          <p style={s.ctaEyebrow}>Ready for What&apos;s Next?</p>
           <h2 style={s.ctaHeadline}>Your value story is ready.<br />Your pricing strategy is next.</h2>
-          <p style={s.ctaSub}>A focused session to sharpen your MCV into a pricing strategy that wins deals.</p>
+          <p style={s.ctaSub}>You Are Worth ... The Price You Accept</p>
           <a
             href="https://www.pricingwire.com/pricing-strategy-sessions"
             target="_blank"
@@ -507,12 +506,8 @@ export default function Home() {
           >
             Book a Strategy Session →
           </a>
+          <p style={s.ctaAttrib}>This tool is provided by PricingWire</p>
         </div>
-
-        {/* ── FOOTER ── */}
-        <footer style={s.footer}>
-          <p style={s.footerBrand}>PricingWire</p>
-        </footer>
 
       </div>
     </>
@@ -603,12 +598,9 @@ const s = {
   copyBtn:        { padding: '8px 16px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '6px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: font },
   actionBtns:     { display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' },
 
-  ctaBand:    { backgroundColor: ink, padding: '64px 40px', textAlign: 'center' },
-  ctaEyebrow: { fontSize: '12px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', color: teal, marginBottom: '20px' },
+  ctaBand:    { backgroundColor: ink, padding: '56px 40px', textAlign: 'center' },
   ctaHeadline: { fontFamily: serif, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: '400', color: '#ffffff', lineHeight: '1.2', marginBottom: '16px', letterSpacing: '-0.5px' },
   ctaSub:     { fontSize: '16px', color: '#9ca3af', lineHeight: '1.7', maxWidth: '440px', margin: '0 auto 32px' },
   ctaButton:  { display: 'inline-block', backgroundColor: teal, color: '#ffffff', padding: '14px 32px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font, letterSpacing: '-0.2px' },
-
-  footer:      { borderTop: `1px solid ${border}`, padding: '20px 40px', textAlign: 'center', backgroundColor: bgSoft },
-  footerBrand: { fontSize: '14px', color: muted, fontWeight: '500' },
+  ctaAttrib:  { fontSize: '13px', color: 'rgba(255,255,255,0.35)', marginTop: '28px' },
 };
