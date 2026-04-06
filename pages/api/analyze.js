@@ -116,6 +116,9 @@ const priorityKeywords = [
   'story', 'leadership', 'traction', 'metric',
 ];
 
+// ── Anthropic client — module scope for warm-invocation efficiency ────────────
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
 // ── Handler ───────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -137,7 +140,7 @@ export default async function handler(req, res) {
   // ── Step 1: Fetch homepage ────────────────────────────────────────────────
   let homepageHtml = '';
   try {
-    const r = await fetch(url, { headers });
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
     if (!r.ok) throw new Error(`Homepage returned status ${r.status}`);
     homepageHtml = await r.text();
   } catch (err) {
@@ -176,7 +179,8 @@ export default async function handler(req, res) {
     );
 
     const enriched = urlScored.map((candidate, i) => {
-      const { ok, html } = fetchResults[i].value;
+      const result = fetchResults[i];
+      const { ok, html } = (result.status === 'fulfilled' && result.value) ? result.value : { ok: false, html: '' };
       const titleMetaText = ok ? extractTitleAndMeta(html) : '';
       const titleMetaScore = scoreText(titleMetaText, priorityKeywords);
       return { ...candidate, ok, html: ok ? html : null, titleMetaScore };
@@ -206,7 +210,6 @@ export default async function handler(req, res) {
   ).join('\n\n');
 
   // ── Step 4: Call Anthropic ────────────────────────────────────────────────
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff.`;
 
