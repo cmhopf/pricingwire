@@ -326,13 +326,13 @@ export default function Home() {
               {/* Why Buy | Why Now */}
               <div className="grid-2" style={s.grid2}>
                 <div style={{ ...s.block, borderRight: `1px solid ${border}` }}>
-                  <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
+                  <div style={s.blockLabel}>✅ Why Buy?</div>
                   <ul style={s.ul}>
                     {(analysis.whyBuy || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
                 <div style={s.block}>
-                  <div style={{ ...s.blockLabel, color: '#d97706' }}>⚡ Why Now?</div>
+                  <div style={s.blockLabel}>⚡ Why Now?</div>
                   <ul style={s.ul}>
                     {(analysis.whyNow || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
@@ -553,19 +553,19 @@ const s = {
 
   companyBlock:    { padding: '36px 36px 28px', borderBottom: `1px solid ${border}` },
   companyName:     { fontSize: '28px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
-  valueHeadline:   { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', color: '#5A5A5A', lineHeight: '1.5', marginBottom: '14px' },
+  valueHeadline:   { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', color: ink, lineHeight: '1.5', marginBottom: '14px' },
   companyOverview: { fontSize: '16px', color: body, lineHeight: '1.75' },
 
   divider:    { height: '1px', backgroundColor: border },
   grid2:      { display: 'grid', gridTemplateColumns: '1fr 1fr' },
   block:      { padding: '28px 32px' },
-  blockLabel: { fontSize: '13px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: muted, marginBottom: '12px' },
+  blockLabel: { fontSize: '16px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: ink, marginBottom: '12px' },
   blockText:  { fontSize: '16px', lineHeight: '1.75', color: body },
   ul:         { paddingLeft: '18px', margin: 0 },
   li:         { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
 
   deepBlock:      { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
-  deepBlockLabel: { fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
+  deepBlockLabel: { fontSize: '16px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
   deepNote:       { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
 
   timelinePeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '8px' },
