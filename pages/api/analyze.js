@@ -226,7 +226,7 @@ Return a markdown-formatted transparency report:
 - State the total number of unique subpages analyzed${singlePageOnly ? ' — add exactly this note after the count: (user selected "Analyze this Page Only")' : usedSitemap ? ' — add exactly this note after the count: (pages discovered via sitemap.xml)' : ''}
 - A bulleted list of page titles/URLs assessed
 - For each page, one sentence on the specific insight discovered there
-- Flag any pages that were blocked or failed to load
+- Note any pages that were blocked or failed to load
 
 STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2 and 3 only)
 Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}. Rank them in order from most compelling/impactful to least.
@@ -267,7 +267,7 @@ STEP 4 — COMPANY PROFILE + VALUE STORY
 Using all pages analyzed, return the following keys:
 - "companyName": The company name
 - "companyOverview": What this company does and who it serves. HARD LIMIT: 310 characters maximum — count every character and optimize wording to fit precisely within this limit.
-- "valueHeadline": One powerful, memorable sentence that captures the ultimate value this company delivers
+- "valueHeadline": One powerful, memorable sentence that captures the ultimate value this company delivers. Keep it concise — no more than 12 words so it displays comfortably on 2 lines.
 - "mcv": A markdown string structured EXACTLY as follows: ONE succinct opening sentence capturing the single most compelling value differentiator. Then a blank line. Then 3–5 bullet points using - prefix, each reinforcing or expanding on that differentiator.
 - "whyBuy": Array of EXACTLY 4 succinct, compelling reasons to buy
 - "whyNow": Array of EXACTLY 3 succinct urgency drivers
