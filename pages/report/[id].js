@@ -184,7 +184,7 @@ export default function ReportPage() {
               </div>
 
               <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
+                <div style={s.deepBlockLabel}>💬 Persona Objection Responses</div>
                 <p style={s.deepNote}>Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.</p>
                 <div className="md-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections}</ReactMarkdown>
@@ -304,7 +304,7 @@ const s = {
   ctaBtn: { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
 
   footer: { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
-  footerLogo: { fontSize: '16px', fontWeight: '700', color: ink, marginBottom: '8px' },
-  footerText: { fontSize: '15px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
-  footerMcv: { fontSize: '14px', color: muted, fontStyle: 'italic' },
+  footerLogo: { fontSize: '21px', fontWeight: '700', color: ink, marginBottom: '8px' },
+  footerText: { fontSize: '20px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
+  footerMcv: { fontSize: '18px', color: muted, fontStyle: 'italic' },
 };
