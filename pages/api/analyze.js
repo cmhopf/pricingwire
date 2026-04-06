@@ -210,7 +210,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff.`;
 
-  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer, valueStory.
+  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer.
 
 Tone for all written narrative content: ${effectiveTone}
 
@@ -279,21 +279,6 @@ CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 - whyNow MUST contain EXACTLY 3 items — no more, no fewer
 - targetBuyer MUST be a single sentence only
 - mcv MUST follow the exact structure: one sentence, blank line, then bullet points with - prefix
-
-STEP 5 — VALUE IMPACT STORY (key: "valueStory")
-Return a nested JSON object with exactly 4 keys: situation, risks, opportunity, payoff. Draw entirely from the analysis above — never invent facts. Favor bullet points. Tailor everything to ${personaSlash}.
-
-"situation": Markdown string. 4–5 bullet points (- prefix) demonstrating deep understanding of the prospect's world — their operational pressures, strategic environment, and current reality. Write in a way that makes them feel clearly understood.
-
-"risks": Markdown string. 4–5 bullet points (- prefix) covering the specific consequences of not making this a top priority. Be concrete — include lost revenue, customer churn, competitive irrelevance, missed opportunities, and the compounding cost of delay.
-
-"opportunity": Markdown string. 4–5 bullet points (- prefix) connecting the top capabilities to measurable prospect outcomes. For each, briefly capture the shift (life without → life with) and what success looks like. Pull directly from the capabilities in the fullTable, most compelling first.
-
-"payoff": Nested object with exactly 4 keys — month1, month3, month6, beyond — each a markdown string of 2–3 specific, measurable bullet points (- prefix):
-  month1: Quick wins and early leading indicators visible within 30 days
-  month3: Measurable progress and initial business impact within 90 days
-  month6: Significant ROI and outcomes becoming clearly visible within 6 months
-  beyond: Sustained competitive advantage and transformational results after 6 months
 
 CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no commentary outside the JSON.`;
 
