@@ -15,6 +15,15 @@ function parseMarkdownTable(markdown) {
   return { headers, rows };
 }
 
+// ── Slice a markdown table to the first n data rows ───────────────────────────
+function sliceMarkdownTable(markdown, n) {
+  if (!markdown) return markdown;
+  const lines = markdown.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 3) return markdown;
+  // lines[0] = header row, lines[1] = separator, lines[2+] = data rows
+  return [lines[0], lines[1], ...lines.slice(2, 2 + n)].join('\n');
+}
+
 function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
   const table = parseMarkdownTable(markdown);
   if (!table) return null;
@@ -64,6 +73,7 @@ export default function Home() {
   const [selectedPersonas, setSelectedPersonas] = useState(['CEO', 'CRO', 'CFO']);
   const [otherPersonaChecked, setOtherPersonaChecked] = useState(false);
   const [otherPersona, setOtherPersona] = useState('');
+  const [mcvCount, setMcvCount] = useState(3);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -122,6 +132,7 @@ export default function Home() {
     setSelectedPersonas(['CEO', 'CRO', 'CFO']);
     setOtherPersonaChecked(false);
     setOtherPersona('');
+    setMcvCount(3);
     window.scrollTo(0, 0);
   };
 
@@ -131,7 +142,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis, url, personas: activePersonas }),
+        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -285,6 +296,30 @@ export default function Home() {
                     <option>Energetic and inspiring</option>
                   </select>
                 </div>
+
+                {/* 4. MCV Capability Count */}
+                <div style={s.personaSection}>
+                  <label style={s.label}>
+                    Capabilities to Display
+                    <span style={s.optional}> (Most Compelling Value table)</span>
+                  </label>
+                  <div style={s.mcvCountRow}>
+                    {[3, 4, 5].map(n => (
+                      <label key={n} style={s.mcvCountOption}>
+                        <input
+                          type="radio"
+                          name="mcvCount"
+                          value={n}
+                          checked={mcvCount === n}
+                          onChange={() => setMcvCount(n)}
+                          style={s.radio}
+                        />
+                        Top {n}
+                      </label>
+                    ))}
+                  </div>
+                  <p style={s.checkboxHint}>Controls how many capabilities appear in the Value Impact — MCV table</p>
+                </div>
                 </>
               )}
 
@@ -303,16 +338,6 @@ export default function Home() {
               <div style={s.spinner} />
               <p style={s.loadingText}>{LOADING_STEPS[loadingStep].doing}</p>
               <p style={s.loadingNext}>Next: {LOADING_STEPS[loadingStep].next}</p>
-            </div>
-          )}
-
-          {/* ── YOUR MOST COMPELLING VALUE (MCV) ── */}
-          {analysis && (
-            <div style={s.mcvSection}>
-              <h2 style={s.mcvHeading}>Your Most Compelling Value (MCV)</h2>
-              <div className="md-content mcv-table-wrap table-wrap">
-                <AssessmentTable markdown={analysis.refinedTable} bulletCols={[3, 4]} className="mcv-table-wrap table-wrap" />
-              </div>
             </div>
           )}
 
@@ -369,10 +394,14 @@ export default function Home() {
 
               <div style={s.divider} />
 
-              {/* Executive Impact Table */}
+              {/* Value Impact — MCV Table (sliced to mcvCount rows) */}
               <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
-                <AssessmentTable markdown={analysis.fullTable} bulletCols={[3, 4]} className="table-wrap" />
+                <div style={s.deepBlockLabel}>📊 Value Impact — Most Compelling Value (MCV) — Top {mcvCount}</div>
+                <AssessmentTable
+                  markdown={sliceMarkdownTable(analysis.fullTable, mcvCount)}
+                  bulletCols={[3, 4]}
+                  className="table-wrap"
+                />
               </div>
 
               {/* Persona Objection Responses */}
@@ -491,10 +520,6 @@ export default function Home() {
         .md-content tr:nth-child(even) td { background: #fafafa; }
         .md-content tr:hover td { background: #f0fdf9; }
 
-        .mcv-table-wrap tr:nth-child(odd) td { background: #ffffff !important; }
-        .mcv-table-wrap tr:nth-child(even) td { background: #f9fafb !important; }
-        .mcv-table-wrap tr:hover td { background: #f5f5f5 !important; }
-
         .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
         .block-md p:last-child { margin-bottom: 0; }
         .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
@@ -540,13 +565,17 @@ const s = {
   checkboxRow: { display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '14px', marginBottom: '4px', borderTop: `1px solid ${border}` },
   checkboxLabel: { display: 'flex', alignItems: 'center', gap: '7px', fontSize: '14px', fontWeight: '600', color: ink, cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' },
   checkbox: { width: '15px', height: '15px', accentColor: teal, cursor: 'pointer' },
-  checkboxHint: { fontSize: '13px', color: muted },
+  checkboxHint: { fontSize: '13px', color: muted, marginTop: '6px' },
 
   personaSection: { paddingTop: '16px', borderTop: `1px solid ${border}`, marginBottom: '4px' },
   personaGrid: { display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '10px', alignItems: 'center' },
   personaItem: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: '500', color: ink, cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' },
   personaOtherInput: { padding: '5px 10px', fontSize: '14px', border: `1px solid ${border}`, borderRadius: '6px', fontFamily: font, color: ink, backgroundColor: bg, outline: 'none', width: '160px' },
   personaMaxNote: { fontWeight: '500', color: '#d97706', fontSize: '13px' },
+
+  mcvCountRow: { display: 'flex', gap: '24px', marginTop: '10px', alignItems: 'center' },
+  mcvCountOption: { display: 'flex', alignItems: 'center', gap: '7px', fontSize: '14px', fontWeight: '500', color: ink, cursor: 'pointer', userSelect: 'none' },
+  radio: { width: '15px', height: '15px', accentColor: teal, cursor: 'pointer' },
 
   disclaimer: { fontSize: '13px', color: muted, marginTop: '16px' },
 
@@ -556,9 +585,6 @@ const s = {
   loadingNext: { fontSize: '13px', color: muted, marginTop: '6px' },
 
   errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
-
-  mcvSection: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', padding: '32px', animation: 'fadeUp 0.4s ease forwards' },
-  mcvHeading: { fontFamily: font, fontSize: '22px', fontWeight: '700', color: ink, marginBottom: '20px', letterSpacing: '-0.3px' },
 
   deepWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', animation: 'fadeUp 0.4s ease forwards' },
   deepHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
