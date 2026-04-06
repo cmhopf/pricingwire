@@ -409,7 +409,7 @@ export default function Home() {
               </div>
 
               {/* Persona Objection Responses */}
-              <div style={s.deepBlock}>
+              <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
                 <div style={s.deepBlockLabel}>💬 Persona Objection Responses</div>
                 <p style={s.deepNote}>Anticipating the top objections from {activePersonas.join(', ')} — with sharp, confident responses.</p>
                 <div className="md-content">
@@ -417,14 +417,80 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Source Audit */}
+            </div>
+          )}
+
+          {/* ── VALUE STORY ── */}
+          {analysis && analysis.valueStory && (
+            <div style={s.storyWrap}>
+
+              <div style={s.storyHeader}>
+                <span style={s.storyPill}>Value Story</span>
+                <p style={s.storySubtitle}>Situation · Risks · Opportunity · Payoff</p>
+              </div>
+
+              {/* Situation */}
               <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🔍 Source Audit</div>
+                <div style={s.deepBlockLabel}>🧭 Situation</div>
+                <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.situation}</ReactMarkdown>
                 </div>
               </div>
 
+              {/* Risks */}
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>⚠️ Risks</div>
+                <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
+                <div className="md-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.risks}</ReactMarkdown>
+                </div>
+              </div>
+
+              {/* Opportunity */}
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>💡 Opportunity</div>
+                <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
+                <div className="md-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.valueStory.opportunity}</ReactMarkdown>
+                </div>
+              </div>
+
+              {/* Payoff */}
+              <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
+                <div style={s.deepBlockLabel}>📈 Payoff</div>
+                <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
+                <div className="payoff-grid" style={s.payoffGrid}>
+                  {[
+                    { period: 'Within 1 Month',      content: analysis.valueStory.payoff?.month1 },
+                    { period: 'Within 3 Months',     content: analysis.valueStory.payoff?.month3 },
+                    { period: 'Within 6 Months',     content: analysis.valueStory.payoff?.month6 },
+                    { period: '6+ Months and Beyond', content: analysis.valueStory.payoff?.beyond },
+                  ].map(({ period, content }, i) => (
+                    <div key={i} style={{
+                      ...s.payoffCell,
+                      borderRight:   i % 2 === 0 ? `1px solid ${border}` : 'none',
+                      borderBottom:  i < 2        ? `1px solid ${border}` : 'none',
+                    }}>
+                      <div style={s.payoffPeriod}>{period}</div>
+                      <div className="md-content">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ── SOURCE AUDIT ── */}
+          {analysis && (
+            <div style={s.auditWrap}>
+              <div style={s.deepBlockLabel}>🔍 Source Audit</div>
+              <div className="md-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+              </div>
             </div>
           )}
 
@@ -532,6 +598,7 @@ export default function Home() {
         @media (max-width: 680px) {
           .grid-2 { grid-template-columns: 1fr !important; }
           .input-row { flex-direction: column !important; }
+          .payoff-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>
@@ -612,6 +679,17 @@ const s = {
   deepBlock: { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
   deepBlockLabel: { fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
   deepNote: { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
+
+  storyWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', animation: 'fadeUp 0.4s ease forwards' },
+  storyHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
+  storyPill: { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
+  storySubtitle: { fontSize: '14px', color: muted },
+
+  payoffGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: '16px', borderTop: `1px solid ${border}` },
+  payoffCell: { padding: '20px 24px' },
+  payoffPeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '10px' },
+
+  auditWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px', animation: 'fadeUp 0.4s ease forwards' },
 
   actionsWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '8px' },
   shareLinkBox: { width: '100%', maxWidth: '560px', border: '1px solid #99f6e4', borderRadius: '10px', padding: '18px 20px', backgroundColor: '#f0fdf9' },
