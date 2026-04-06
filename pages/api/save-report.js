@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { analysis, url, personas } = req.body;
+  const { analysis, url, personas, mcvCount } = req.body;
 
   if (!analysis) {
     return res.status(400).json({ error: 'No analysis data provided.' });
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       url,
       analysis,
       personas: (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'],
+      mcvCount: (typeof mcvCount === 'number' && [3, 4, 5].includes(mcvCount)) ? mcvCount : 3,
       createdAt: new Date().toISOString(),
     };
 
