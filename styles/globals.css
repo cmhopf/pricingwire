@@ -9,19 +9,52 @@ body {
   background-color: #f8f9fa;
 }
 
+/* ── Animations ── */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
-@media (max-width: 640px) {
-  .grid-2col {
-    grid-template-columns: 1fr !important;
-  }
-  .input-row {
-    flex-direction: column !important;
-  }
-  .advanced-grid {
-    grid-template-columns: 1fr !important;
-  }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Markdown content ── */
+.md-content p { font-size: 16px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-content ul { padding-left: 20px; margin-bottom: 12px; }
+.md-content li { font-size: 16px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
+.md-content strong { color: #111827; font-weight: 600; }
+.md-content h3,
+.md-content h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+  margin: 20px 0 8px;
+}
+.md-content h3:first-child,
+.md-content h4:first-child { margin-top: 0; }
+
+/* ── Markdown tables ── */
+.table-wrap { overflow-x: auto; }
+.md-content table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
+.md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.md-content th strong { color: #fff; font-weight: 600; }
+.md-content td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: top; line-height: 1.6; color: #374151; }
+.md-content tr:last-child td { border-bottom: none; }
+.md-content tr:nth-child(even) td { background: #fafafa; }
+.md-content tr:hover td { background: #f0fdf9; }
+
+/* ── Block-level markdown (smaller text in grid cells) ── */
+.block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
+.block-md p:last-child { margin-bottom: 0; }
+.block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
+.block-md li { font-size: 15px; line-height: 1.65; color: #374151; margin-bottom: 6px; }
+
+/* ── Responsive layout ── */
+@media (max-width: 680px) {
+  .grid-2      { grid-template-columns: 1fr !important; }
+  .input-row   { flex-direction: column !important; }
+  .payoff-grid { grid-template-columns: 1fr !important; }
 }
