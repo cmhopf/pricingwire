@@ -12,7 +12,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const id = Math.random().toString(36).substring(2, 10);
+    // Timestamp prefix eliminates collision risk; random suffix adds entropy
+    const id = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
 
     const data = {
       id,
