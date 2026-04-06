@@ -23,9 +23,7 @@ function AssessmentTable({ markdown, bulletCols = [], className = '' }) {
     <div style={{ overflowX: 'auto' }} className={`md-content ${className}`}>
       <table>
         <thead>
-          <tr>
-            {table.headers.map((h, i) => <th key={i}>{h}</th>)}
-          </tr>
+          <tr>{table.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
         </thead>
         <tbody>
           {table.rows.map((row, ri) => (
@@ -68,15 +66,18 @@ export default function ReportPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const assessment = report?.assessment;
-  const deepAssessment = report?.deepAssessment;
+  // Backward compatibility: reports saved before the merge used
+  // { assessment, deepAssessment }. New reports use { analysis }.
+  const analysis = report?.analysis ||
+    (report?.assessment ? { ...report.assessment, ...(report?.deepAssessment || {}) } : null);
+
   const sourceUrl = report?.url;
   const personas = report?.personas || ['CEO', 'CRO', 'CFO'];
 
   return (
     <>
       <Head>
-        <title>{assessment ? `${assessment.companyName} — Value Impact Assessment` : 'Value Impact Assessment — PricingWire'}</title>
+        <title>{analysis ? `${analysis.companyName} — Value Impact Assessment` : 'Value Impact Assessment — PricingWire'}</title>
         <meta name="description" content="Value Impact Assessment powered by PricingWire" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,7 +101,6 @@ export default function ReportPage() {
 
         <main style={s.main}>
 
-          {/* Report loading state */}
           {loading && (
             <div style={s.loadingBox}>
               <div style={s.spinner} />
@@ -110,98 +110,82 @@ export default function ReportPage() {
 
           {error && <div style={s.errorBox}>⚠️ {error}</div>}
 
-          {/* ── YOUR MOST COMPELLING VALUE (MCV) — TOP SECTION ── */}
-          {deepAssessment && (
+          {/* ── YOUR MOST COMPELLING VALUE (MCV) ── */}
+          {analysis && (
             <div style={s.mcvSection}>
               <h2 style={s.mcvHeading}>Your Most Compelling Value (MCV)</h2>
-              <AssessmentTable markdown={deepAssessment.refinedTable} bulletCols={[3, 4]} className="mcv-table-wrap table-wrap" />
+              <AssessmentTable markdown={analysis.refinedTable} bulletCols={[3, 4]} className="mcv-table-wrap table-wrap" />
             </div>
           )}
 
-          {/* ── EXECUTIVE DEEP-DIVE SECTION ── */}
-          {assessment && (
+          {/* ── EXECUTIVE DEEP-DIVE ── */}
+          {analysis && (
             <div style={s.deepWrap}>
 
-              {/* Deep-Dive Header */}
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
                 <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
               </div>
 
-              {/* Company Name + Value Headline + Company Overview */}
               <div style={s.companyBlock}>
-                <div style={s.companyName}>{assessment.companyName}</div>
-                <p style={s.valueHeadline}>&quot;{assessment.valueHeadline}&quot;</p>
-                <p style={s.companyOverview}>{assessment.companyOverview}</p>
+                <div style={s.companyName}>{analysis.companyName}</div>
+                <p style={s.valueHeadline}>&quot;{analysis.valueHeadline}&quot;</p>
+                <p style={s.companyOverview}>{analysis.companyOverview}</p>
               </div>
 
               <div style={s.divider} />
 
-              {/* Brief Value Story | Ideal Target Buyer(s) */}
               <div className="grid-2" style={s.grid2}>
                 <div style={s.block}>
                   <div style={s.blockLabel}>⭐ Brief Value Story</div>
                   <div className="md-content block-md">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{assessment.mcv}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.mcv}</ReactMarkdown>
                   </div>
                 </div>
                 <div style={s.block}>
                   <div style={s.blockLabel}>🎯 Ideal Target Buyer(s)</div>
-                  <p style={s.blockText}>{assessment.targetBuyer}</p>
+                  <p style={s.blockText}>{analysis.targetBuyer}</p>
                 </div>
               </div>
 
               <div style={s.divider} />
 
-              {/* Why Buy | Why Now */}
               <div className="grid-2" style={s.grid2}>
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
                   <ul style={s.ul}>
-                    {assessment.whyBuy.map((item, i) => (
-                      <li key={i} style={s.li}>{item}</li>
-                    ))}
+                    {analysis.whyBuy.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#d97706' }}>⚡ Why Now?</div>
                   <ul style={s.ul}>
-                    {assessment.whyNow.map((item, i) => (
-                      <li key={i} style={s.li}>{item}</li>
-                    ))}
+                    {analysis.whyNow.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
               </div>
 
-              {/* Deep-dive specifics */}
-              {deepAssessment && (
-                <>
-                  <div style={s.divider} />
+              <div style={s.divider} />
 
-                  {/* Executive Impact Table — Top 5 */}
-                  <div style={s.deepBlock}>
-                    <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
-                    <AssessmentTable markdown={deepAssessment.fullTable} bulletCols={[3, 4]} className="table-wrap" />
-                  </div>
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>📊 Executive Impact Table — Top 5</div>
+                <AssessmentTable markdown={analysis.fullTable} bulletCols={[3, 4]} className="table-wrap" />
+              </div>
 
-                  {/* Persona Objection Responses */}
-                  <div style={s.deepBlock}>
-                    <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
-                    <p style={s.deepNote}>Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.</p>
-                    <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.personaObjections}</ReactMarkdown>
-                    </div>
-                  </div>
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>🗣️ Persona Objection Responses</div>
+                <p style={s.deepNote}>Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.</p>
+                <div className="md-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections}</ReactMarkdown>
+                </div>
+              </div>
 
-                  {/* Source Audit */}
-                  <div style={s.deepBlock}>
-                    <div style={s.deepBlockLabel}>🔍 Source Audit</div>
-                    <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{deepAssessment.sourceAudit}</ReactMarkdown>
-                    </div>
-                  </div>
-                </>
-              )}
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>🔍 Source Audit</div>
+                <div className="md-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+                </div>
+              </div>
 
             </div>
           )}
@@ -228,7 +212,6 @@ export default function ReportPage() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── General markdown styles ── */
         .md-content p { font-size: 16px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
         .md-content p:last-child { margin-bottom: 0; }
         .md-content ul { padding-left: 20px; margin-bottom: 12px; }
@@ -237,7 +220,6 @@ export default function ReportPage() {
         .md-content h3, .md-content h4 { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: #111827; margin: 20px 0 8px; }
         .md-content h3:first-child, .md-content h4:first-child { margin-top: 0; }
 
-        /* ── Table styles ── */
         .table-wrap { overflow-x: auto; }
         .md-content table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
         .md-content th { background: #111827; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -247,12 +229,10 @@ export default function ReportPage() {
         .md-content tr:nth-child(even) td { background: #fafafa; }
         .md-content tr:hover td { background: #f0fdf9; }
 
-        /* ── MCV table — clean alternating, no green tint ── */
         .mcv-table-wrap tr:nth-child(odd) td { background: #ffffff !important; }
         .mcv-table-wrap tr:nth-child(even) td { background: #f9fafb !important; }
         .mcv-table-wrap tr:hover td { background: #f5f5f5 !important; }
 
-        /* ── Brief Value Story block markdown — compact sizing ── */
         .block-md p { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
         .block-md p:last-child { margin-bottom: 0; }
         .block-md ul { padding-left: 18px; margin-top: 4px; margin-bottom: 0; }
@@ -290,17 +270,14 @@ const s = {
   loadingText: { fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px' },
   errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
 
-  // Your MCV section (top)
   mcvSection: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', padding: '32px' },
   mcvHeading: { fontFamily: font, fontSize: '22px', fontWeight: '700', color: ink, marginBottom: '20px', letterSpacing: '-0.3px' },
 
-  // Executive Deep-Dive wrapper
   deepWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
   deepHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
   deepPill: { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
   deepSubtitle: { fontSize: '14px', color: muted },
 
-  // Company block (inside deepWrap)
   companyBlock: { padding: '36px 36px 28px', borderBottom: `1px solid ${border}` },
   companyName: { fontSize: '28px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
   valueHeadline: { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', color: '#5A5A5A', lineHeight: '1.5', marginBottom: '14px' },
@@ -314,17 +291,14 @@ const s = {
   ul: { paddingLeft: '18px', margin: 0 },
   li: { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
 
-  // Deep content blocks
   deepBlock: { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
   deepBlockLabel: { fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
   deepNote: { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
 
-  // CTA
   ctaBox: { border: `1px solid ${border}`, borderRadius: '12px', padding: '32px', textAlign: 'center', backgroundColor: bgSoft },
   ctaText: { fontSize: '17px', color: body, marginBottom: '16px', lineHeight: '1.6' },
   ctaBtn: { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
 
-  // Footer
   footer: { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
   footerLogo: { fontSize: '16px', fontWeight: '700', color: ink, marginBottom: '8px' },
   footerText: { fontSize: '15px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
