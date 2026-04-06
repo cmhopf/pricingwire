@@ -213,7 +213,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff.`;
 
-  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer, storySituation, storyRisks, storyOpportunity, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond.
+  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond.
 
 Tone for all written narrative content: ${effectiveTone}
 
@@ -283,19 +283,11 @@ CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 - targetBuyer MUST be a single sentence only
 - mcv MUST follow the exact structure: one sentence, blank line, then bullet points with - prefix
 
-STEP 5 — VALUE IMPACT STORY
-Return 7 flat string keys. All values are markdown strings with bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Tailor to ${personaSlash}.
-
-VOICE: Write in second person ("you", "your") throughout. Situation may open with social-proof framing ("Most ${personaSlash}s in your space...") before shifting to "you". Risks use "If you...", "Without this, you...", "Every quarter you delay...". Opportunity uses "Today you..." → "With [Company], you...". Payoff uses commitment language: "In the first 30 days you will...", "By month 3 you'll...", "Within 6 months you will...". Never use third-person.
-
-"storySituation": 3–4 bullets. Open 1–2 with social-proof framing to validate the challenge, then shift to direct "you" language. Cover current approach, pressures, and gaps — before any solution is mentioned.
-
-"storyRisks": 3–4 bullets. Use "If you...", "Every quarter you delay...", "Without this..." framing. Cover lost revenue, churn, competitive irrelevance, and cost of inaction for a ${personaSlash}.
-
-"storyOpportunity": 3–4 bullets, one per top capability in fullTable rank order. Format each as: **[Capability]**: Today you [life without]. With [Company], you [life with] — tracked by [metric], which means [why care].
+STEP 5 — VALUE TIMELINE
+Return 4 flat string keys. Each value is a markdown string with exactly 2 bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Use commitment language throughout ("you will", "you'll"). Tailor all outcomes to ${personaSlash} priorities.
 
 "payoffMonth1": 2 bullets — specific quick wins visible in the first 30 days using "you will" language.
-"payoffMonth3": 2 bullets — measurable progress by 90 days a ${personaSlash} can report upward.
+"payoffMonth3": 2 bullets — measurable progress by 90 days that a ${personaSlash} can report upward.
 "payoffMonth6": 2 bullets — significant ROI clearly visible and defensible at 6 months.
 "payoffBeyond": 2 bullets — compounding competitive advantage beyond 6 months.
 
