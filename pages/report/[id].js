@@ -12,6 +12,7 @@ export default function ReportPage() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [auditExpanded, setAuditExpanded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -31,12 +32,12 @@ export default function ReportPage() {
     (report?.assessment ? { ...report.assessment, ...(report?.deepAssessment || {}) } : null);
 
   const sourceUrl = report?.url;
-  const personas = report?.personas || ['CEO', 'CRO', 'CFO'];
+  const personas  = report?.personas || ['CEO', 'CRO', 'CFO'];
 
-  // mcvCount: use saved value if present and valid, otherwise default to 3
+  // mcvCount: use saved value if present and valid, otherwise default to 4
   const mcvCount = (report?.mcvCount && [3, 4, 5].includes(report.mcvCount))
     ? report.mcvCount
-    : 3;
+    : 4;
 
   return (
     <>
@@ -83,6 +84,7 @@ export default function ReportPage() {
                 <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
               </div>
 
+              {/* Company Name + Value Headline + Overview */}
               <div style={s.companyBlock}>
                 <div style={s.companyName}>{analysis.companyName}</div>
                 <p style={s.valueHeadline}>&quot;{analysis.valueHeadline}&quot;</p>
@@ -91,39 +93,43 @@ export default function ReportPage() {
 
               <div style={s.divider} />
 
-              <div className="grid-2" style={s.grid2}>
-                <div style={s.block}>
-                  <div style={s.blockLabel}>⭐ Brief Value Story</div>
-                  <div className="md-content block-md">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.mcv}</ReactMarkdown>
-                  </div>
-                </div>
-                <div style={s.block}>
-                  <div style={s.blockLabel}>🎯 Ideal Target Buyer(s)</div>
-                  <p style={s.blockText}>{analysis.targetBuyer}</p>
+              {/* Brief Value Story — full width */}
+              <div style={s.block}>
+                <div style={s.blockLabel}>⭐ Brief Value Story</div>
+                <div className="md-content block-md">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.mcv}</ReactMarkdown>
                 </div>
               </div>
 
               <div style={s.divider} />
 
+              {/* Ideal Target Buyer — full width */}
+              <div style={s.block}>
+                <div style={s.blockLabel}>🎯 Ideal Target Buyer(s)</div>
+                <p style={s.blockText}>{analysis.targetBuyer}</p>
+              </div>
+
+              <div style={s.divider} />
+
+              {/* Why Buy | Why Now */}
               <div className="grid-2" style={s.grid2}>
-                <div style={s.block}>
+                <div style={{ ...s.block, borderRight: `1px solid ${border}` }}>
                   <div style={{ ...s.blockLabel, color: '#0d9488' }}>✅ Why Buy?</div>
                   <ul style={s.ul}>
-                    {analysis.whyBuy.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
+                    {(analysis.whyBuy || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
                 <div style={s.block}>
                   <div style={{ ...s.blockLabel, color: '#d97706' }}>⚡ Why Now?</div>
                   <ul style={s.ul}>
-                    {analysis.whyNow.map((item, i) => <li key={i} style={s.li}>{item}</li>)}
+                    {(analysis.whyNow || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
                   </ul>
                 </div>
               </div>
 
               <div style={s.divider} />
 
-              {/* Value Impact — MCV Table (sliced to saved mcvCount) */}
+              {/* Value Impact — MCV Table */}
               <div style={s.deepBlock}>
                 <div style={s.deepBlockLabel}>📊 Value Impact — Most Compelling Value (MCV) — Top {mcvCount}</div>
                 <AssessmentTable
@@ -133,9 +139,35 @@ export default function ReportPage() {
                 />
               </div>
 
+              {/* Value Timeline */}
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>📈 Value Timeline</div>
+                <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
+                {[
+                  { period: 'Within 1 Month',     content: analysis.payoffMonth1 },
+                  { period: 'Within 3 Months',    content: analysis.payoffMonth3 },
+                  { period: 'Within 6 Months',    content: analysis.payoffMonth6 },
+                  { period: '6+ Months & Beyond', content: analysis.payoffBeyond },
+                ].map(({ period, content }, i, arr) => (
+                  <div key={i} style={{
+                    paddingTop:    i === 0 ? '0' : '16px',
+                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
+                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
+                  }}>
+                    <div style={s.timelinePeriod}>{period}</div>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Persona Objection Responses — fully visible on shared reports */}
               <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
                 <div style={s.deepBlockLabel}>💬 Persona Objection Responses</div>
-                <p style={s.deepNote}>Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.</p>
+                <p style={s.deepNote}>
+                  Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.
+                </p>
                 <div className="md-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections}</ReactMarkdown>
                 </div>
@@ -144,73 +176,18 @@ export default function ReportPage() {
             </div>
           )}
 
-          {/* ── VALUE STORY ── */}
-          {analysis && analysis.storySituation && (
-            <div style={s.storyWrap}>
-
-              <div style={s.storyHeader}>
-                <span style={s.storyPill}>Value Story</span>
-                <p style={s.storySubtitle}>Situation · Risks · Opportunity · Payoff</p>
-              </div>
-
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🧭 Situation</div>
-                <p style={s.deepNote}>A clear-eyed view of where your prospects are today.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storySituation}</ReactMarkdown>
-                </div>
-              </div>
-
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>⚠️ Risks</div>
-                <p style={s.deepNote}>What&apos;s at stake if this isn&apos;t addressed as a priority.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyRisks}</ReactMarkdown>
-                </div>
-              </div>
-
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>💡 Opportunity</div>
-                <p style={s.deepNote}>Where your capabilities create the most compelling advantage.</p>
-                <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.storyOpportunity}</ReactMarkdown>
-                </div>
-              </div>
-
-              <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
-                <div style={s.deepBlockLabel}>📈 Payoff</div>
-                <p style={s.deepNote}>Measurable outcomes your buyers can expect over time.</p>
-                <div className="payoff-grid" style={s.payoffGrid}>
-                  {[
-                    { period: 'Within 1 Month',       content: analysis.payoffMonth1 },
-                    { period: 'Within 3 Months',      content: analysis.payoffMonth3 },
-                    { period: 'Within 6 Months',      content: analysis.payoffMonth6 },
-                    { period: '6+ Months and Beyond', content: analysis.payoffBeyond },
-                  ].map(({ period, content }, i) => (
-                    <div key={i} style={{
-                      ...s.payoffCell,
-                      borderRight:  i % 2 === 0 ? `1px solid ${border}` : 'none',
-                      borderBottom: i < 2        ? `1px solid ${border}` : 'none',
-                    }}>
-                      <div style={s.payoffPeriod}>{period}</div>
-                      <div className="md-content">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          {/* ── SOURCE AUDIT ── */}
+          {/* ── SOURCE AUDIT — collapsible ── */}
           {analysis && (
             <div style={s.auditWrap}>
-              <div style={s.deepBlockLabel}>🔍 Source Audit</div>
-              <div className="md-content">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
-              </div>
+              <button onClick={() => setAuditExpanded(prev => !prev)} style={s.auditToggle}>
+                <span style={{ ...s.deepBlockLabel, marginBottom: 0 }}>🔍 Source Audit</span>
+                <span style={s.auditChevron}>{auditExpanded ? '▲' : '▼'}</span>
+              </button>
+              {auditExpanded && (
+                <div style={{ marginTop: '20px' }} className="md-content">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+                </div>
+              )}
             </div>
           )}
 
@@ -231,66 +208,59 @@ export default function ReportPage() {
         </footer>
 
       </div>
-
-
     </>
   );
 }
 
 // ── Style objects ──────────────────────────────────────────────────────────────
-
 const s = {
-  page: { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
-  nav: { borderBottom: `1px solid ${border}`, padding: '20px 40px', backgroundColor: bg, textAlign: 'center' },
+  page:        { minHeight: '100vh', fontFamily: font, color: ink, backgroundColor: bg, display: 'flex', flexDirection: 'column' },
+  nav:         { borderBottom: `1px solid ${border}`, padding: '20px 40px', backgroundColor: bg, textAlign: 'center' },
   navTitleRow: { display: 'flex', alignItems: 'baseline', justifyContent: 'center' },
-  navTitle: { fontFamily: serif, fontSize: '40px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
-  navBy: { fontFamily: font, fontSize: '20px', fontWeight: '400', color: '#9ca3af' },
-  navOrigin: { fontFamily: font, fontSize: '16px', fontWeight: '400', color: muted, marginTop: '5px' },
-  main: { maxWidth: '880px', margin: '0 auto', padding: '48px 24px 80px', width: '100%', flex: 1 },
-  loadingBox: { textAlign: 'center', padding: '40px 24px', border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bgSoft, marginBottom: '24px' },
-  spinner: { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
-  loadingText: { fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px' },
-  errorBox: { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
+  navTitle:    { fontFamily: serif, fontSize: '40px', fontWeight: '700', color: ink, letterSpacing: '-0.3px' },
+  navBy:       { fontFamily: font, fontSize: '20px', fontWeight: '400', color: '#9ca3af' },
+  navOrigin:   { fontFamily: font, fontSize: '16px', fontWeight: '400', color: muted, marginTop: '5px' },
+  main:        { maxWidth: '880px', margin: '0 auto', padding: '48px 24px 80px', width: '100%', flex: 1 },
 
-  deepWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
-  deepHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
-  deepPill: { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
+  loadingBox:  { textAlign: 'center', padding: '40px 24px', border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bgSoft, marginBottom: '24px' },
+  spinner:     { width: '28px', height: '28px', border: `2px solid ${border}`, borderTopColor: ink, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto' },
+  loadingText: { fontSize: '16px', fontWeight: '500', color: ink, marginTop: '14px' },
+  errorBox:    { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '14px 18px', color: '#b91c1c', fontSize: '15px', marginBottom: '24px' },
+
+  deepWrap:     { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
+  deepHeader:   { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
+  deepPill:     { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
   deepSubtitle: { fontSize: '14px', color: muted },
 
-  companyBlock: { padding: '36px 36px 28px', borderBottom: `1px solid ${border}` },
-  companyName: { fontSize: '28px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
-  valueHeadline: { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', color: '#5A5A5A', lineHeight: '1.5', marginBottom: '14px' },
+  companyBlock:    { padding: '36px 36px 28px', borderBottom: `1px solid ${border}` },
+  companyName:     { fontSize: '28px', fontWeight: '700', color: ink, marginBottom: '12px', letterSpacing: '-0.5px' },
+  valueHeadline:   { fontFamily: serif, fontSize: 'clamp(19px, 2.5vw, 24px)', color: '#5A5A5A', lineHeight: '1.5', marginBottom: '14px' },
   companyOverview: { fontSize: '16px', color: body, lineHeight: '1.75' },
 
-  divider: { height: '1px', backgroundColor: border },
-  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr' },
-  block: { padding: '28px 32px', borderRight: `1px solid ${border}` },
+  divider:    { height: '1px', backgroundColor: border },
+  grid2:      { display: 'grid', gridTemplateColumns: '1fr 1fr' },
+  block:      { padding: '28px 32px' },
   blockLabel: { fontSize: '13px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: muted, marginBottom: '12px' },
-  blockText: { fontSize: '16px', lineHeight: '1.75', color: body },
-  ul: { paddingLeft: '18px', margin: 0 },
-  li: { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
+  blockText:  { fontSize: '16px', lineHeight: '1.75', color: body },
+  ul:         { paddingLeft: '18px', margin: 0 },
+  li:         { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
 
-  deepBlock: { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
+  deepBlock:      { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
   deepBlockLabel: { fontSize: '14px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
-  deepNote: { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
+  deepNote:       { fontSize: '15px', color: muted, marginBottom: '16px', fontStyle: 'italic', lineHeight: '1.6' },
 
-  storyWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden' },
-  storyHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
-  storyPill: { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: teal, backgroundColor: '#f0fdf9', border: '1px solid #99f6e4', borderRadius: '20px', padding: '4px 12px' },
-  storySubtitle: { fontSize: '14px', color: muted },
+  timelinePeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '8px' },
 
-  payoffGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: '16px', borderTop: `1px solid ${border}` },
-  payoffCell: { padding: '20px 24px' },
-  payoffPeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '10px' },
+  auditWrap:    { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '20px 32px' },
+  auditToggle:  { background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, fontFamily: font },
+  auditChevron: { fontSize: '11px', color: muted, marginLeft: '12px' },
 
-  auditWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px' },
-
-  ctaBox: { border: `1px solid ${border}`, borderRadius: '12px', padding: '32px', textAlign: 'center', backgroundColor: bgSoft },
+  ctaBox:  { border: `1px solid ${border}`, borderRadius: '12px', padding: '32px', textAlign: 'center', backgroundColor: bgSoft },
   ctaText: { fontSize: '17px', color: body, marginBottom: '16px', lineHeight: '1.6' },
-  ctaBtn: { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
+  ctaBtn:  { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
 
-  footer: { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
+  footer:     { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
   footerLogo: { fontSize: '21px', fontWeight: '700', color: ink, marginBottom: '8px' },
   footerText: { fontSize: '20px', color: muted, lineHeight: '1.7', marginBottom: '6px' },
-  footerMcv: { fontSize: '18px', color: muted, fontStyle: 'italic' },
+  footerMcv:  { fontSize: '18px', color: muted, fontStyle: 'italic' },
 };
