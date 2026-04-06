@@ -5,10 +5,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { assessment, deepAssessment, url, personas } = req.body;
+  const { analysis, url, personas } = req.body;
 
-  if (!assessment) {
-    return res.status(400).json({ error: 'No assessment data provided.' });
+  if (!analysis) {
+    return res.status(400).json({ error: 'No analysis data provided.' });
   }
 
   try {
@@ -17,8 +17,7 @@ export default async function handler(req, res) {
     const data = {
       id,
       url,
-      assessment,
-      deepAssessment: deepAssessment || null,
+      analysis,
       personas: (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'],
       createdAt: new Date().toISOString(),
     };
@@ -37,7 +36,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('Save report error:', err);
-    // Return the actual error message so we can diagnose it
     return res.status(500).json({
       error: `Save failed: ${err.message || 'Unknown error'}`,
     });
