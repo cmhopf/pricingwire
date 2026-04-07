@@ -163,7 +163,7 @@ export default function Home() {
           <main style={s.main}>
 
           {/* ── INPUT CARD ── */}
-          {!analysis && (
+          {!analysis && !loading && (
           <div style={s.inputCard}>
             <form onSubmit={handleSubmit}>
               <label style={s.label}>Company website URL</label>
