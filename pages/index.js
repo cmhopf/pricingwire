@@ -6,7 +6,7 @@ import { AssessmentTable, sliceMarkdownTable } from '../lib/tableHelpers';
 import { font, serif, teal, ink, body, muted, border, bg, bgSoft } from '../lib/designTokens';
 
 // ── MCV count — fixed at Top 4 ────────────────────────────────────────────────
-const mcvCount = 4;
+const mcvCount = 3;
 
 // ── Loading step messages ──────────────────────────────────────────────────────
 const PRESET_PERSONAS = ['CEO', 'CRO', 'CFO', 'CMO', 'CIO', 'CTO'];
@@ -21,7 +21,8 @@ const LOADING_STEPS = [
 
 export default function Home() {
   const [url, setUrl] = useState('');
-  const [tone, setTone] = useState('Professional and persuasive');
+  const [tone, setTone] = useState('');
+  const [reportTone, setReportTone] = useState('Professional and persuasive');
   const [singlePageOnly, setSinglePageOnly] = useState(false);
   const [selectedPersonas, setSelectedPersonas] = useState(['CEO', 'CRO', 'CFO']);
   const [otherPersonaChecked, setOtherPersonaChecked] = useState(false);
@@ -54,6 +55,9 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const effectiveTone = tone.trim() || 'Professional and persuasive';
+    setReportTone(effectiveTone);
+    setTone('');
     setLoading(true);
     setError('');
     setAnalysis(null);
@@ -67,7 +71,7 @@ export default function Home() {
       const r = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, singlePageOnly, personas: activePersonas, tone }),
+        body: JSON.stringify({ url, singlePageOnly, personas: activePersonas, tone: effectiveTone }),
       });
       const data = await r.json();
       if (data.error) throw new Error(data.error);
@@ -93,6 +97,8 @@ export default function Home() {
     setEmailInput('');
     setVsUnlocked(false);
     setAuditExpanded(false);
+    setTone('');
+    setReportTone('Professional and persuasive');
     window.scrollTo(0, 0);
   };
 
@@ -102,7 +108,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount }),
+        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount, tone: reportTone }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -254,15 +260,17 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* 3. Tone */}
+                  {/* 3. Replace Tone */}
                   <div style={s.personaSection}>
-                    <label style={s.label}>Tone</label>
-                    <select value={tone} onChange={e => setTone(e.target.value)} style={{ ...s.input, marginTop: '2px' }}>
-                      <option>Professional and persuasive</option>
-                      <option>Bold and direct</option>
-                      <option>Consultative and thoughtful</option>
-                      <option>Energetic and inspiring</option>
-                    </select>
+                    <label style={s.label}>Replace Tone</label>
+                    <input
+                      type="text"
+                      value={tone}
+                      onChange={e => setTone(e.target.value)}
+                      placeholder="Default: Professional & Persuasive. (max 30 chars.)"
+                      maxLength={30}
+                      style={{ ...s.input, marginTop: '2px' }}
+                    />
                   </div>
                 </>
               )}
@@ -297,6 +305,7 @@ export default function Home() {
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
                 <p style={s.deepSubtitle}>Multi-page analysis · {activePersonas.join(' · ')}</p>
+                <p style={{ ...s.deepSubtitle, width: '100%', marginTop: '2px' }}>Tone: {reportTone}</p>
               </div>
 
               {/* Company Name + Value Headline + Overview */}
