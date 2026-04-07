@@ -34,10 +34,11 @@ export default function ReportPage() {
   const sourceUrl = report?.url;
   const personas  = report?.personas || ['CEO', 'CRO', 'CFO'];
 
-  // mcvCount: use saved value if present and valid, otherwise default to 4
-  const mcvCount = (report?.mcvCount && [3, 4, 5].includes(report.mcvCount))
-    ? report.mcvCount
-    : 4;
+  // mcvCount: use saved value if present, otherwise default to 3
+  const mcvCount = report?.mcvCount || 3;
+
+  // tone: use saved value if present, otherwise default
+  const reportTone = report?.tone || 'Professional and persuasive';
 
   return (
     <>
@@ -82,6 +83,7 @@ export default function ReportPage() {
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
                 <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
+                <p style={{ ...s.deepSubtitle, width: '100%', marginTop: '2px' }}>Tone: {reportTone}</p>
               </div>
 
               {/* Company Name + Value Headline + Overview */}
