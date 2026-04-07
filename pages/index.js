@@ -163,6 +163,7 @@ export default function Home() {
           <main style={s.main}>
 
           {/* ── INPUT CARD ── */}
+          {!analysis && (
           <div style={s.inputCard}>
             <form onSubmit={handleSubmit}>
               <label style={s.label}>Company website URL</label>
@@ -269,7 +270,7 @@ export default function Home() {
                       onChange={e => setTone(e.target.value)}
                       placeholder="Default: Professional & Persuasive. (max 30 chars.)"
                       maxLength={30}
-                      style={{ ...s.input, marginTop: '2px' }}
+                      style={{ ...s.input, marginTop: '2px', width: '100%', flex: 'none' }}
                     />
                   </div>
                 </>
@@ -283,6 +284,7 @@ export default function Home() {
               </p>
             </form>
           </div>
+          )}{/* end !analysis input card */}
 
           {/* ── ERROR ── */}
           {error && <div style={s.errorBox}>⚠️ {error}</div>}
@@ -304,8 +306,10 @@ export default function Home() {
               {/* Header */}
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
-                <p style={s.deepSubtitle}>Multi-page analysis · {activePersonas.join(' · ')}</p>
-                <p style={{ ...s.deepSubtitle, width: '100%', marginTop: '2px' }}>Tone: {reportTone}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <p style={s.deepSubtitle}>Multi-page analysis · {activePersonas.join(' · ')}</p>
+                  <p style={s.deepSubtitle}>Tone: {reportTone}</p>
+                </div>
               </div>
 
               {/* Company Name + Value Headline + Overview */}
