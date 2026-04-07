@@ -141,17 +141,20 @@ export default function Home() {
 
       <div style={s.page}>
 
-        {/* ── HERO ── */}
-        <section style={s.hero}>
-          <p style={s.heroEyebrow}>For Technology Innovators</p>
-          <h1 style={s.heroTitle}>Value Impact Assessment</h1>
-          <p style={s.heroSub}>
-            Instantly generate a compelling value story that highlights <strong>&quot;Why Buy?&quot;</strong> and <strong>&quot;Why Now?&quot;</strong>
-          </p>
-        </section>
+        {/* ── 100VH WRAPPER — keeps footer below fold on first load ── */}
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-        {/* ── MAIN ── */}
-        <main style={s.main}>
+          {/* ── HERO ── */}
+          <section style={s.hero}>
+            <p style={s.heroEyebrow}>For Technology Innovators</p>
+            <h1 style={s.heroTitle}>Value Impact Assessment</h1>
+            <p style={s.heroSub}>
+              Instantly generate a compelling value story that highlights <strong>&quot;Why Buy?&quot;</strong> and <strong>&quot;Why Now?&quot;</strong>
+            </p>
+          </section>
+
+          {/* ── MAIN ── */}
+          <main style={s.main}>
 
           {/* ── INPUT CARD ── */}
           <div style={s.inputCard}>
@@ -494,20 +497,22 @@ export default function Home() {
 
         </main>
 
-        {/* ── CTA BAND ── */}
-        <div style={s.ctaBand}>
-          <h2 style={s.ctaHeadline}>Your value story is ready.<br />Your pricing strategy is next.</h2>
-          <p style={s.ctaSub}>You Are Worth ... The Price You Accept</p>
+        </div>{/* end 100vh wrapper */}
+
+        {/* ── FOOTER ── */}
+        <footer style={s.footer}>
+          <p style={s.footerText}>
+            PricingWire helps you quantify, communicate, and monetize your Most Compelling Value (MCV).
+          </p>
           <a
             href="https://www.pricingwire.com/pricing-strategy-sessions"
             target="_blank"
             rel="noopener noreferrer"
-            style={s.ctaButton}
+            style={s.footerLink}
           >
-            Book a Strategy Session →
+            Click to Book a Strategy Session
           </a>
-          <p style={s.ctaAttrib}>This tool is provided by PricingWire</p>
-        </div>
+        </footer>
 
       </div>
     </>
@@ -598,9 +603,7 @@ const s = {
   copyBtn:        { padding: '8px 16px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '6px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: font },
   actionBtns:     { display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' },
 
-  ctaBand:    { backgroundColor: ink, padding: '56px 40px', textAlign: 'center' },
-  ctaHeadline: { fontFamily: serif, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: '400', color: '#ffffff', lineHeight: '1.2', marginBottom: '16px', letterSpacing: '-0.5px' },
-  ctaSub:     { fontSize: '16px', color: '#9ca3af', lineHeight: '1.7', maxWidth: '440px', margin: '0 auto 32px' },
-  ctaButton:  { display: 'inline-block', backgroundColor: teal, color: '#ffffff', padding: '14px 32px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font, letterSpacing: '-0.2px' },
-  ctaAttrib:  { fontSize: '13px', color: 'rgba(255,255,255,0.35)', marginTop: '28px' },
+  footer:      { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
+  footerText:  { fontSize: '15px', color: body, lineHeight: '1.7', marginBottom: '14px' },
+  footerLink:  { fontSize: '13px', color: teal, textDecoration: 'none', fontWeight: '500' },
 };
