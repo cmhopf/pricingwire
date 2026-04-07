@@ -82,8 +82,10 @@ export default function ReportPage() {
 
               <div style={s.deepHeader}>
                 <span style={s.deepPill}>Executive Deep-Dive</span>
-                <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
-                <p style={{ ...s.deepSubtitle, width: '100%', marginTop: '2px' }}>Tone: {reportTone}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
+                  <p style={s.deepSubtitle}>Tone: {reportTone}</p>
+                </div>
               </div>
 
               {/* Company Name + Value Headline + Overview */}
