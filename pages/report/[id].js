@@ -201,20 +201,20 @@ export default function ReportPage() {
 
         </main>
 
-        {/* ── CTA BAND ── */}
-        <div style={s.ctaBand}>
-          <h2 style={s.ctaHeadline}>Your value story is ready.<br />Your pricing strategy is next.</h2>
-          <p style={s.ctaSub}>You Are Worth ... The Price You Accept</p>
+        {/* ── FOOTER ── */}
+        <footer style={s.footer}>
+          <p style={s.footerText}>
+            PricingWire helps you quantify, communicate, and monetize your Most Compelling Value (MCV).
+          </p>
           <a
             href="https://www.pricingwire.com/pricing-strategy-sessions"
             target="_blank"
             rel="noopener noreferrer"
-            style={s.ctaButton}
+            style={s.footerLink}
           >
-            Book a Strategy Session →
+            Click to Book a Strategy Session
           </a>
-          <p style={s.ctaAttrib}>This tool is provided by PricingWire</p>
-        </div>
+        </footer>
 
       </div>
     </>
@@ -268,9 +268,7 @@ const s = {
   ctaText: { fontSize: '17px', color: body, marginBottom: '16px', lineHeight: '1.6' },
   ctaBtn:  { display: 'inline-block', backgroundColor: ink, color: '#fff', padding: '11px 24px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font },
 
-  ctaBand:    { backgroundColor: ink, padding: '56px 40px', textAlign: 'center' },
-  ctaHeadline: { fontFamily: serif, fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: '400', color: '#ffffff', lineHeight: '1.2', marginBottom: '16px', letterSpacing: '-0.5px' },
-  ctaSub:     { fontSize: '16px', color: '#9ca3af', lineHeight: '1.7', maxWidth: '440px', margin: '0 auto 32px' },
-  ctaButton:  { display: 'inline-block', backgroundColor: teal, color: '#ffffff', padding: '14px 32px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none', fontFamily: font, letterSpacing: '-0.2px' },
-  ctaAttrib:  { fontSize: '13px', color: 'rgba(255,255,255,0.35)', marginTop: '28px' },
+  footer:      { borderTop: `1px solid ${border}`, padding: '40px', textAlign: 'center', backgroundColor: bgSoft },
+  footerText:  { fontSize: '15px', color: body, lineHeight: '1.7', marginBottom: '14px' },
+  footerLink:  { fontSize: '13px', color: teal, textDecoration: 'none', fontWeight: '500' },
 };
