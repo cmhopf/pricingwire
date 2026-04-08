@@ -287,6 +287,8 @@ CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 STEP 5 — VALUE TIMELINE
 Return 4 flat string keys. Each value is a markdown string with exactly 2 bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Use commitment language throughout ("you will", "you'll"). Tailor all outcomes to ${personaSlash} priorities.
 
+CRITICAL: All 4 keys — payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond — MUST be present and non-empty. Each must represent a meaningfully distinct but credible and realistic time horizon. IF content is similar, the same or not credible based on website content review, THEN populate with "nothing credible found for this window of time". Skipping any period is not permitted.
+
 "payoffMonth1": 2 bullets — specific quick wins visible in the first 30 days using "you will" language.
 "payoffMonth3": 2 bullets — measurable progress by 90 days that a ${personaSlash} can report upward.
 "payoffMonth6": 2 bullets — significant ROI clearly visible and defensible at 6 months.
