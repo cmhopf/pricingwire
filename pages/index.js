@@ -454,6 +454,7 @@ export default function Home() {
                 <p style={s.deepSubtitle}>Here's how to use your Value Impact Assessment</p>
               </div>
               <div style={s.nextStepsBody}>
+                <div style={s.deepBlockLabel}>🚀 Next Steps</div>
                 <p style={{ ...s.deepNote, marginBottom: '20px' }}>Your Top 3 Priorities — validate, operationalize, and monetize this assessment.</p>
                 {[
                   analysis.nextStep1,
