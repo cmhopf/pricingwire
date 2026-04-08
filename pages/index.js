@@ -449,23 +449,28 @@ export default function Home() {
           {/* ── NEXT STEPS ── */}
           {analysis && (
             <div style={s.nextStepsWrap}>
-              <div style={s.deepBlockLabel}>🚀 Next Steps</div>
-              <p style={s.deepNote}>Your Top 3 Priorities — how to validate, operationalize, and monetize this assessment.</p>
-              {[
-                analysis.nextStep1,
-                analysis.nextStep2,
-                analysis.nextStep3,
-              ].map((content, i, arr) => (
-                <div key={i} style={{
-                  paddingTop:    i === 0 ? '0' : '16px',
-                  paddingBottom: i < arr.length - 1 ? '16px' : '0',
-                  borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
-                }}>
-                  <div className="md-content">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+              <div style={s.nextStepsHeader}>
+                <span style={s.nextStepsPill}>Now What?</span>
+                <p style={s.deepSubtitle}>Here's how to use your Value Impact Assessment</p>
+              </div>
+              <div style={s.nextStepsBody}>
+                <p style={{ ...s.deepNote, marginBottom: '20px' }}>Your Top 3 Priorities — validate, operationalize, and monetize this assessment.</p>
+                {[
+                  analysis.nextStep1,
+                  analysis.nextStep2,
+                  analysis.nextStep3,
+                ].map((content, i, arr) => (
+                  <div key={i} style={{
+                    paddingTop:    i === 0 ? '0' : '16px',
+                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
+                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
+                  }}>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -580,7 +585,10 @@ const s = {
   gateBtn:     { padding: '10px 20px', backgroundColor: teal, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: font, whiteSpace: 'nowrap' },
   gatePrivacy: { fontSize: '13px', color: muted },
 
-  nextStepsWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px', animation: 'fadeUp 0.4s ease forwards' },
+  nextStepsWrap:   { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', overflow: 'hidden', animation: 'fadeUp 0.4s ease forwards' },
+  nextStepsHeader: { padding: '24px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bgSoft, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' },
+  nextStepsPill:   { fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#2563eb', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '20px', padding: '4px 12px' },
+  nextStepsBody:   { padding: '28px 32px' },
   auditWrap:    { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '20px 32px', animation: 'fadeUp 0.4s ease forwards' },
   auditToggle:  { background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, fontFamily: font },
   auditChevron: { fontSize: '11px', color: muted, marginLeft: '12px' },
