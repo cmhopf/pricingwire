@@ -130,7 +130,7 @@ export default function Home() {
     <>
       <Head>
         <title>Value Impact Assessment — PricingWire</title>
-        <meta name="description" content="Instantly generate a compelling value story for your company." />
+        <meta name="description" content="Your Most Compelling Value (MCV) is the fastest path to revenue acquisition, retention and expansion." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
@@ -148,7 +148,7 @@ export default function Home() {
             <p style={s.heroEyebrow}>For Technology Innovators</p>
             <h1 style={s.heroTitle}>Value Impact Assessment</h1>
             <p style={s.heroSub}>
-              Instantly generate a compelling value story with clear, prioritized <strong>Next Steps</strong> your buyers can act on.
+              Your Most Compelling Value (MCV) is the fastest path to revenue acquisition, retention and expansion.
             </p>
           </section>
 
