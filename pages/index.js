@@ -21,8 +21,6 @@ const LOADING_STEPS = [
 
 export default function Home() {
   const [url, setUrl] = useState('');
-  const [tone, setTone] = useState('');
-  const [reportTone, setReportTone] = useState('Professional and persuasive');
   const [singlePageOnly, setSinglePageOnly] = useState(false);
   const [selectedPersonas, setSelectedPersonas] = useState(['CEO', 'CRO', 'CFO']);
   const [otherPersonaChecked, setOtherPersonaChecked] = useState(false);
@@ -55,9 +53,6 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const effectiveTone = tone.trim() || 'Professional and persuasive';
-    setReportTone(effectiveTone);
-    setTone('');
     setLoading(true);
     setError('');
     setAnalysis(null);
@@ -71,7 +66,7 @@ export default function Home() {
       const r = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, singlePageOnly, personas: activePersonas, tone: effectiveTone }),
+        body: JSON.stringify({ url, singlePageOnly, personas: activePersonas }),
       });
       const data = await r.json();
       if (data.error) throw new Error(data.error);
@@ -97,8 +92,6 @@ export default function Home() {
     setEmailInput('');
     setVsUnlocked(false);
     setAuditExpanded(false);
-    setTone('');
-    setReportTone('Professional and persuasive');
     window.scrollTo(0, 0);
   };
 
@@ -108,7 +101,7 @@ export default function Home() {
       const response = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount, tone: reportTone }),
+        body: JSON.stringify({ analysis, url, personas: activePersonas, mcvCount }),
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
@@ -261,18 +254,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* 3. Replace Tone */}
-                  <div style={s.personaSection}>
-                    <label style={s.label}>Replace Tone</label>
-                    <input
-                      type="text"
-                      value={tone}
-                      onChange={e => setTone(e.target.value)}
-                      placeholder="Default: Professional & Persuasive. (max 30 chars.)"
-                      maxLength={30}
-                      style={{ ...s.input, marginTop: '2px', width: '100%', flex: 'none' }}
-                    />
-                  </div>
                 </>
               )}
 
@@ -308,7 +289,7 @@ export default function Home() {
                 <span style={s.deepPill}>Executive Deep-Dive</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <p style={s.deepSubtitle}>Multi-page analysis · {activePersonas.join(' · ')}</p>
-                  <p style={s.deepSubtitle}>Tone: {reportTone}</p>
+                  <p style={s.deepSubtitle}>Tone: Professional, Persuasive and Succinct</p>
                 </div>
               </div>
 
