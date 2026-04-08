@@ -125,11 +125,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url, singlePageOnly, personas, tone } = req.body;
+  const { url, singlePageOnly, personas } = req.body;
   const effectivePersonas = (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'];
   const personaList = effectivePersonas.join(', ');
   const personaSlash = effectivePersonas.join('/');
-  const effectiveTone = tone || 'Professional and persuasive';
 
   if (!url) {
     return res.status(400).json({ error: 'Please provide a website URL.' });
@@ -211,11 +210,9 @@ export default async function handler(req, res) {
 
   // ── Step 4: Call Anthropic ────────────────────────────────────────────────
 
-  const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff.`;
+  const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff. Tone throughout all output: Professional, Persuasive and Succinct.`;
 
   const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond.
-
-Tone for all written narrative content: ${effectiveTone}
 
 Website: ${url}
 
@@ -229,18 +226,21 @@ Return a markdown-formatted transparency report:
 - State the total number of unique subpages analyzed${singlePageOnly ? ' — add exactly this note after the count: (user selected "Analyze this Page Only")' : usedSitemap ? ' — add exactly this note after the count: (pages discovered via sitemap.xml)' : ''}
 - A bulleted list of page titles/URLs assessed
 - For each page, one sentence on the specific insight discovered there
-- Note any pages that were blocked or failed to load
+- CRITICAL: If any page was blocked by a robots.txt file or failed to load, explicitly flag that URL
 
 STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2 and 3 only)
 Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}. Rank them in order from most compelling/impactful to least.
+
+STEP 1B — RANK BY STRATEGIC MERIT (internal — determines table row order)
+Evaluate all 5 capabilities and produce a definitive ranking from most to least compelling for ${personaSlash}, weighing four factors: (1) emotional impact on the buyer, (2) measurability of ROI, (3) urgency and cost of inaction, (4) competitive differentiation. This ranking is final — row 1 of the table must be the single most compelling capability, row 5 the least. Do not default to the order from Step 1 — re-evaluate deliberately.
 
 STEP 2 — FULL VALUE IMPACT TABLE (key: "fullTable")
 Return ONLY a markdown table with exactly these 5 columns in bold headers:
 | **Capability** | **Life Without** | **Life With** | **How to Measure** | **Why Care** |
 - Exactly 5 rows, one per capability, ordered most compelling first (row 1 = highest impact, row 5 = lowest)
 - Each cell: 1–2 short sentences, under 50 words
-- Life Without/With contrasts must be sharp, emotional, outcome-focused
-- Tailor pain points and Why Care to ${personaSlash} priorities
+- Life Without/With contrasts must be sharp, emotional, and outcome-focused — emphasizing time savings, cost reduction, revenue growth, and risk reduction
+- Tailor all pain points and Why Care statements specifically to ${personaSlash} priorities and vocabulary
 - For the "How to Measure" and "Why Care" columns ONLY: separate each distinct point with " >> " so they can be displayed as individual bullet points. Example for How to Measure: "Track pipeline conversion weekly >> Review win/loss reports monthly >> Monitor deal velocity in CRM"
 
 STEP 3 — PERSONA OBJECTION RESPONSES (key: "personaObjections")
@@ -265,6 +265,7 @@ CRITICAL FORMATTING RULES FOR STEP 3:
 - Leave exactly one blank line between the bolded objection and its bullet-point responses
 - Each bullet MUST be exactly one sentence — no run-ons, no semicolons joining two thoughts
 - Maximum 3 bullets per objection response
+- Each set of bullets must collectively address: ROI justification, risk mitigation, and ease of adoption — in a sharp, confident manner
 
 STEP 4 — COMPANY PROFILE + VALUE STORY
 Using all pages analyzed, return the following keys:
