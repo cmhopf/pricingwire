@@ -135,27 +135,6 @@ export default function ReportPage() {
                 ))}
               </div>
 
-              {/* Next Steps */}
-              <div style={s.deepBlock}>
-                <div style={s.deepBlockLabel}>🚀 Next Steps</div>
-                <p style={s.deepNote}>Your Top 3 Priorities</p>
-                {[
-                  analysis.nextStep1,
-                  analysis.nextStep2,
-                  analysis.nextStep3,
-                ].map((content, i, arr) => (
-                  <div key={i} style={{
-                    paddingTop:    i === 0 ? '0' : '16px',
-                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
-                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
-                  }}>
-                    <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
               {/* Persona Objection Responses — fully visible on shared reports */}
               <div style={{ ...s.deepBlock, borderBottom: 'none' }}>
                 <div style={s.deepBlockLabel}>💬 Persona Objection Responses</div>
@@ -167,6 +146,29 @@ export default function ReportPage() {
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* ── NEXT STEPS ── */}
+          {analysis && (
+            <div style={s.nextStepsWrap}>
+              <div style={s.deepBlockLabel}>🚀 Next Steps</div>
+              <p style={s.deepNote}>Your Top 3 Priorities — how to validate, operationalize, and monetize this assessment.</p>
+              {[
+                analysis.nextStep1,
+                analysis.nextStep2,
+                analysis.nextStep3,
+              ].map((content, i, arr) => (
+                <div key={i} style={{
+                  paddingTop:    i === 0 ? '0' : '16px',
+                  paddingBottom: i < arr.length - 1 ? '16px' : '0',
+                  borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
+                }}>
+                  <div className="md-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -254,6 +256,7 @@ const s = {
 
   timelinePeriod: { fontSize: '12px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: teal, marginBottom: '8px' },
 
+  nextStepsWrap: { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '28px 32px' },
   auditWrap:    { border: `1px solid ${border}`, borderRadius: '12px', backgroundColor: bg, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', marginBottom: '24px', padding: '20px 32px' },
   auditToggle:  { background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, fontFamily: font },
   auditChevron: { fontSize: '11px', color: muted, marginLeft: '12px' },
