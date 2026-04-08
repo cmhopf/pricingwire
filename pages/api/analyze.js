@@ -289,20 +289,31 @@ CRITICAL: All 4 keys — payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond 
 "payoffBeyond": 2 bullets — compounding competitive advantage beyond 6 months.
 
 STEP 6 — NEXT STEPS (keys: "nextStep1", "nextStep2", "nextStep3")
-Based entirely on the analysis above, produce exactly 3 prioritized next steps for the ${personaSlash} to act on. Return each as a flat markdown string using this exact structure:
+The user of PricingWire is the company whose website was just analyzed. They are using this assessment to validate, operationalize, and monetize their Most Compelling Value. Produce exactly 3 prioritized next steps written directly to this company — not to their customers or prospects.
 
-**Priority #[N]: [Short, action-oriented title]**
+Draw from three possible themes and sequence them in whatever order is most relevant to this specific company's situation:
 
-- [Bullet 1 — one succinct, clear, actionable sentence drawn from the analysis.]
+VALIDATE — Help the company confirm that the MCV findings in this report resonate with real prospects and customers before fully committing. This is the natural home for an "Always Be Experimenting" mindset — encourage a focused pilot, a targeted test conversation, or a quick win that can be measured and validated with minimal risk.
+
+OPERATIONALIZE — Guide the company to take the specific messaging, value table, and findings from this report and actively use them in sales conversations, discovery calls, proposals, customer success interactions, and internal alignment.
+
+MONETIZE — Push the company to use what gets validated to evaluate their pricing, packaging, expansion opportunities, retention levers, and whether they can accelerate time-to-value for customers to drive growth.
+
+Return each as a flat markdown string using this exact structure:
+
+**Priority #[N]: [Short, action-oriented title specific to this company]**
+
+- [Bullet 1 — one succinct, clear, actionable sentence grounded in this company's specific situation.]
 - [Bullet 2 — one additional sentence only if genuinely needed. Omit if one bullet is sufficient.]
 
 CRITICAL RULES FOR STEP 6:
 - Exactly 3 next steps — no more, no fewer
+- Address the company directly — never write from the perspective of their customers or prospects
 - Each priority title must be specific to this company's situation — never generic
 - Maximum 2 bullets per priority — 1 bullet is acceptable and preferred if sufficient
-- At least one of the three priorities MUST encourage an "Always Be Experimenting" mindset — frame it around running a focused pilot, validating a specific capability, or measuring a quick win before full commitment
+- At least one priority MUST encourage an "Always Be Experimenting" mindset — Claude decides which priority this fits best
+- Order the three priorities by what is most urgent and impactful for this specific company
 - All content must be grounded in the website analysis — never invent facts
-- Priorities must be ordered by urgency and impact for the ${personaSlash}
 
 CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no commentary outside the JSON.`;
 
