@@ -37,9 +37,6 @@ export default function ReportPage() {
   // mcvCount: use saved value if present, otherwise default to 3
   const mcvCount = report?.mcvCount || 3;
 
-  // tone: use saved value if present, otherwise default
-  const reportTone = report?.tone || 'Professional and persuasive';
-
   return (
     <>
       <Head>
@@ -84,7 +81,7 @@ export default function ReportPage() {
                 <span style={s.deepPill}>Executive Deep-Dive</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <p style={s.deepSubtitle}>Multi-page analysis · {personas.join(' · ')}</p>
-                  <p style={s.deepSubtitle}>Tone: {reportTone}</p>
+                  <p style={s.deepSubtitle}>Tone: Professional, Persuasive and Succinct</p>
                 </div>
               </div>
 
