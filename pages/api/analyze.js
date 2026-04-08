@@ -204,9 +204,9 @@ export default async function handler(req, res) {
   }
 
   // ── Step 3: Build content block for Claude ────────────────────────────────
-  const pagesBlock = pages.map(p =>
+  const pagesBlock = '--- CONTENT START ---\n\n' + pages.map(p =>
     `--- PAGE: ${p.title} ---\nURL: ${p.url}\nSTATUS: ${p.status}\n${p.text ? `CONTENT:\n${p.text}` : '(no content retrieved)'}`
-  ).join('\n\n');
+  ).join('\n\n') + '\n\n--- CONTENT END ---';
 
   // ── Step 4: Call Anthropic ────────────────────────────────────────────────
 
@@ -216,8 +216,12 @@ export default async function handler(req, res) {
 
 Website: ${url}
 
-Pages analyzed:
+Pages selected for relevance to this company's value proposition:
 ${pagesBlock}
+
+Evaluate ONLY the content between --- CONTENT START --- and --- CONTENT END --- above. Do not draw on any source outside that boundary.
+If you recognize this company from prior training, set that aside. Every claim you make must be directly defensible from the extracted content provided.
+If the extracted content does not contain enough information to support a confident conclusion for any field, state that explicitly — do not supplement with assumed or inferred knowledge.
 
 Follow these exact instructions for each section:
 
