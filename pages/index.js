@@ -148,7 +148,7 @@ export default function Home() {
             <p style={s.heroEyebrow}>For Technology Innovators</p>
             <h1 style={s.heroTitle}>Value Impact Assessment</h1>
             <p style={s.heroSub}>
-              Instantly generate a compelling value story that highlights <strong>&quot;Why Buy?&quot;</strong> and <strong>&quot;Why Now?&quot;</strong>
+              Instantly generate a compelling value story with clear, prioritized <strong>Next Steps</strong> your buyers can act on.
             </p>
           </section>
 
@@ -302,38 +302,10 @@ export default function Home() {
 
               <div style={s.divider} />
 
-              {/* Brief Value Story — full width */}
-              <div style={s.block}>
-                <div style={s.blockLabel}>⭐ Brief Value Story</div>
-                <div className="md-content block-md">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.mcv}</ReactMarkdown>
-                </div>
-              </div>
-
-              <div style={s.divider} />
-
               {/* Ideal Target Buyer — full width */}
               <div style={s.block}>
                 <div style={s.blockLabel}>🎯 Ideal Target Buyer(s)</div>
                 <p style={s.blockText}>{analysis.targetBuyer}</p>
-              </div>
-
-              <div style={s.divider} />
-
-              {/* Why Buy | Why Now */}
-              <div className="grid-2" style={s.grid2}>
-                <div style={{ ...s.block, borderRight: `1px solid ${border}` }}>
-                  <div style={s.blockLabel}>✅ Why Buy?</div>
-                  <ul style={s.ul}>
-                    {(analysis.whyBuy || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
-                  </ul>
-                </div>
-                <div style={s.block}>
-                  <div style={s.blockLabel}>⚡ Why Now?</div>
-                  <ul style={s.ul}>
-                    {(analysis.whyNow || []).map((item, i) => <li key={i} style={s.li}>{item}</li>)}
-                  </ul>
-                </div>
               </div>
 
               <div style={s.divider} />
@@ -364,6 +336,27 @@ export default function Home() {
                     borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
                   }}>
                     <div style={s.timelinePeriod}>{period}</div>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Next Steps */}
+              <div style={s.deepBlock}>
+                <div style={s.deepBlockLabel}>🚀 Next Steps</div>
+                <p style={s.deepNote}>Your Top 3 Priorities</p>
+                {[
+                  analysis.nextStep1,
+                  analysis.nextStep2,
+                  analysis.nextStep3,
+                ].map((content, i, arr) => (
+                  <div key={i} style={{
+                    paddingTop:    i === 0 ? '0' : '16px',
+                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
+                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
+                  }}>
                     <div className="md-content">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
                     </div>
