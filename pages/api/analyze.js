@@ -236,7 +236,15 @@ STEP 1 — IDENTIFY TOP CAPABILITIES (internal — informs Steps 2 and 3 only)
 Identify the absolute top 5 most compelling and differentiating capabilities or benefits that solve the biggest pains for: ${personaList}. Rank them in order from most compelling/impactful to least.
 
 STEP 1B — RANK BY STRATEGIC MERIT (internal — determines table row order)
-Evaluate all 5 capabilities and produce a definitive ranking from most to least compelling for ${personaSlash}, weighing four factors: (1) emotional impact on the buyer, (2) measurability of ROI, (3) urgency and cost of inaction, (4) competitive differentiation. This ranking is final — row 1 of the table must be the single most compelling capability, row 5 the least. Do not default to the order from Step 1 — re-evaluate deliberately.
+Evaluate all 5 capabilities and produce a definitive ranking from most to least compelling, weighing these five factors in order of importance:
+
+1. Urgency and cost of inaction — how burning is this problem, and what does it cost to leave it unsolved?
+2. Relevance to ${personaSlash} — how directly does this capability address a known priority for the specific personas selected? A capability irrelevant to ${personaSlash} must rank lower regardless of its strength on other factors.
+3. Proximity to revenue — how directly does this capability connect to pipeline growth, retention, or expansion for ${personaSlash}?
+4. Breadth of impact across personas — does this capability matter to all of ${personaSlash} simultaneously, or only to one? Broader alignment ranks higher.
+5. Measurability of ROI — can the outcome be quantified with real metrics that ${personaSlash} can report and defend?
+
+This ranking is final — row 1 of the table must be the single most compelling capability, row 5 the least. Do not default to the order from Step 1 — re-evaluate deliberately against these five factors in sequence.
 
 STEP 2 — FULL VALUE IMPACT TABLE (key: "fullTable")
 Return ONLY a markdown table with exactly these 5 columns in bold headers:
