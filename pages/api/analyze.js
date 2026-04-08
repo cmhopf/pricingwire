@@ -212,7 +212,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a world-class B2B value messaging strategist specializing in helping technology companies communicate compelling value to executive buyers. You produce structured, insight-rich analysis with zero fluff. Tone throughout all output: Professional, Persuasive and Succinct.`;
 
-  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, mcv, whyBuy, whyNow, targetBuyer, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond.
+  const userPrompt = `Analyze the following website content and produce a comprehensive value assessment. Return your response as a single valid JSON object with exactly these keys: sourceAudit, fullTable, personaObjections, companyName, companyOverview, valueHeadline, targetBuyer, payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond, nextStep1, nextStep2, nextStep3.
 
 Website: ${url}
 
@@ -267,22 +267,16 @@ CRITICAL FORMATTING RULES FOR STEP 3:
 - Maximum 3 bullets per objection response
 - Each set of bullets must collectively address: ROI justification, risk mitigation, and ease of adoption — in a sharp, confident manner
 
-STEP 4 — COMPANY PROFILE + VALUE STORY
+STEP 4 — COMPANY PROFILE
 Using all pages analyzed, return the following keys:
 - "companyName": The company name
 - "companyOverview": What this company does and who it serves. HARD LIMIT: 310 characters maximum — count every character and optimize wording to fit precisely within this limit.
 - "valueHeadline": One powerful, memorable sentence that captures the ultimate value this company delivers. Keep it concise — no more than 12 words so it displays comfortably on 2 lines.
-- "mcv": A markdown string structured EXACTLY as follows: ONE succinct opening sentence capturing the single most compelling value differentiator. Then a blank line. Then 3–5 bullet points using - prefix, each reinforcing or expanding on that differentiator.
-- "whyBuy": Array of EXACTLY 4 succinct, compelling reasons to buy
-- "whyNow": Array of EXACTLY 3 succinct urgency drivers
 - "targetBuyer": ONE sentence describing the ideal buyer persona — no semicolons splitting into multiple thoughts
 
 CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 - companyOverview MUST be 310 characters or fewer — count every character carefully
-- whyBuy MUST contain EXACTLY 4 items — no more, no fewer
-- whyNow MUST contain EXACTLY 3 items — no more, no fewer
 - targetBuyer MUST be a single sentence only
-- mcv MUST follow the exact structure: one sentence, blank line, then bullet points with - prefix
 
 STEP 5 — VALUE TIMELINE
 Return 4 flat string keys. Each value is a markdown string with exactly 2 bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Use commitment language throughout ("you will", "you'll"). Tailor all outcomes to ${personaSlash} priorities.
@@ -293,6 +287,22 @@ CRITICAL: All 4 keys — payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond 
 "payoffMonth3": 2 bullets — measurable progress by 90 days that a ${personaSlash} can report upward.
 "payoffMonth6": 2 bullets — significant ROI clearly visible and defensible at 6 months.
 "payoffBeyond": 2 bullets — compounding competitive advantage beyond 6 months.
+
+STEP 6 — NEXT STEPS (keys: "nextStep1", "nextStep2", "nextStep3")
+Based entirely on the analysis above, produce exactly 3 prioritized next steps for the ${personaSlash} to act on. Return each as a flat markdown string using this exact structure:
+
+**Priority #[N]: [Short, action-oriented title]**
+
+- [Bullet 1 — one succinct, clear, actionable sentence drawn from the analysis.]
+- [Bullet 2 — one additional sentence only if genuinely needed. Omit if one bullet is sufficient.]
+
+CRITICAL RULES FOR STEP 6:
+- Exactly 3 next steps — no more, no fewer
+- Each priority title must be specific to this company's situation — never generic
+- Maximum 2 bullets per priority — 1 bullet is acceptable and preferred if sufficient
+- At least one of the three priorities MUST encourage an "Always Be Experimenting" mindset — frame it around running a focused pilot, validating a specific capability, or measuring a quick win before full commitment
+- All content must be grounded in the website analysis — never invent facts
+- Priorities must be ordered by urgency and impact for the ${personaSlash}
 
 CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no commentary outside the JSON.`;
 
