@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import dns from 'dns';
 
 // ── Strip HTML tags and return clean text ─────────────────────────────────────
 function extractText(html) {
@@ -125,6 +126,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // ── API key guard ─────────────────────────────────────────────────────────
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'Service is temporarily unavailable. Please try again later.' });
+  }
+
   const { url, singlePageOnly, personas } = req.body;
   const effectivePersonas = (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'];
   const personaList = effectivePersonas.join(', ');
@@ -135,6 +141,24 @@ export default async function handler(req, res) {
   }
 
   const headers = { 'User-Agent': 'Mozilla/5.0 (compatible; PricingWire/1.0)' };
+
+  // ── SSRF protection — block private/internal IP ranges ───────────────────
+  try {
+    const hostname = new URL(url).hostname;
+    const resolved = await dns.promises.lookup(hostname);
+    const ip = resolved.address;
+    const isPrivate =
+      /^127\./.test(ip) ||
+      /^10\./.test(ip) ||
+      /^192\.168\./.test(ip) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip) ||
+      ip === '169.254.169.254';
+    if (isPrivate) {
+      return res.status(400).json({ error: 'That URL is not accessible for analysis.' });
+    }
+  } catch {
+    return res.status(400).json({ error: 'Could not resolve the hostname for that URL. Please check the address and try again.' });
+  }
 
   // ── Step 1: Fetch homepage ────────────────────────────────────────────────
   let homepageHtml = '';
@@ -335,7 +359,7 @@ CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no c
       max_tokens: 8000,
       messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
-    });
+    }, { timeout: 120000 });
 
     const raw = message.content[0].text.trim()
       .replace(/^```json\s*/i, '')
