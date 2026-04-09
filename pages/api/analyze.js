@@ -103,19 +103,79 @@ function extractTitleAndMeta(html) {
   return `${title} ${meta}`.toLowerCase();
 }
 
-// ── Score a text string against the keyword dictionary ───────────────────────
-function scoreText(text, keywords) {
-  return keywords.reduce((s, kw) => s + (text.includes(kw) ? 1 : 0), 0);
+// ── Three-tier keyword dictionary (Challenger Sale framework) ─────────────────
+// Tier 1 (weight 3) — Why think differently / Why the problem matters
+// Tier 2 (weight 2) — Why what we offer is the solution
+// Tier 3 (weight 1) — How it works / How to get started / Time to Value
+const tierKeywords = {
+  1: [
+    'why', 'problem', 'challenge', 'insight', 'opportunity',
+    'vision', 'mission', 'manifesto', 'future', 'trend',
+    'cost-of', 'risk', 'gap', 'broken', 'rethink',
+    'reimagine', 'transform', 'shift', 'rethinking',
+    'state-of', 'report', 'research', 'study', 'data',
+    'blog', 'resources', 'insights', 'thought', 'perspective',
+    'industry', 'market', 'landscape', 'benchmark',
+  ],
+  2: [
+    'product', 'platform', 'solution', 'feature', 'capability',
+    'use-case', 'value', 'benefit', 'outcome', 'result',
+    'customer', 'case-study', 'success', 'proof', 'testimonial',
+    'roi', 'impact', 'savings', 'growth', 'revenue',
+    'versus', 'compare', 'competitive', 'leader', 'award',
+    'partner', 'ecosystem', 'integration', 'marketplace',
+    'why-us', 'why-choose', 'differentiator', 'advantage',
+  ],
+  3: [
+    'how', 'works', 'demo', 'tour', 'walkthrough',
+    'getting-started', 'onboard', 'deploy', 'implement',
+    'architecture', 'technology', 'security', 'compliance',
+    'api', 'docs', 'documentation', 'developer', 'technical',
+    'time-to-value', 'quick-start', 'setup', 'install',
+    'trial', 'pilot', 'proof-of-concept', 'sandbox',
+    'get-started', 'next-steps', 'process',
+  ],
+};
+const tierWeights = { 1: 3, 2: 2, 3: 1 };
+
+// ── Score text against tiered dictionary — returns totalScore, tierScores, dominantTier ──
+function scoreTiered(text) {
+  const tierScores = {};
+  let totalScore = 0;
+  for (const tier of [1, 2, 3]) {
+    const weighted = tierKeywords[tier].reduce((s, kw) => s + (text.includes(kw) ? tierWeights[tier] : 0), 0);
+    tierScores[tier] = weighted;
+    totalScore += weighted;
+  }
+  let dominantTier = 0;
+  let dominantScore = -1;
+  for (const tier of [1, 2, 3]) {
+    if (tierScores[tier] > dominantScore) {
+      dominantScore = tierScores[tier];
+      dominantTier = tier;
+    }
+  }
+  return { totalScore, tierScores, dominantTier };
 }
 
-// ── Expanded keyword dictionary (product + investor/founder signals) ──────────
-const priorityKeywords = [
-  'product', 'solution', 'feature', 'platform', 'use',
-  'pricing', 'benefit', 'why', 'how', 'about',
-  'customer', 'case', 'results', 'proof', 'partner',
-  'team', 'investor', 'market', 'growth', 'vision',
-  'story', 'leadership', 'traction', 'metric',
-];
+// ── Combine two tier score results (URL + title/meta) ─────────────────────────
+function combineTierScores(a, b) {
+  const tierScores = {};
+  let totalScore = 0;
+  for (const tier of [1, 2, 3]) {
+    tierScores[tier] = (a.tierScores[tier] || 0) + (b.tierScores[tier] || 0);
+    totalScore += tierScores[tier];
+  }
+  let dominantTier = 0;
+  let dominantScore = -1;
+  for (const tier of [1, 2, 3]) {
+    if (tierScores[tier] > dominantScore) {
+      dominantScore = tierScores[tier];
+      dominantTier = tier;
+    }
+  }
+  return { totalScore, tierScores, dominantTier };
+}
 
 // ── Anthropic client — module scope for warm-invocation efficiency ────────────
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -174,7 +234,7 @@ export default async function handler(req, res) {
   const pages = [{
     url,
     title: 'Homepage',
-    text: extractText(homepageHtml).substring(0, 2000),
+    text: extractText(homepageHtml).substring(0, 3000),
     status: 'ok',
   }];
 
@@ -186,13 +246,16 @@ export default async function handler(req, res) {
     usedSitemap = sitemapResult !== null && sitemapResult.length > 0;
     const candidateUrls = usedSitemap ? sitemapResult : extractLinks(homepageHtml, url);
 
-    // Phase B — URL scoring, top 14 candidates
+    // Phase B — tiered URL scoring, top 12 candidates
     const urlScored = candidateUrls
-      .map(link => ({ link, urlScore: scoreText(link.toLowerCase(), priorityKeywords) }))
-      .sort((a, b) => b.urlScore - a.urlScore)
-      .slice(0, 14);
+      .map(link => {
+        const scored = scoreTiered(link.toLowerCase());
+        return { link, urlScored: scored };
+      })
+      .sort((a, b) => b.urlScored.totalScore - a.urlScored.totalScore)
+      .slice(0, 12);
 
-    // Phase C — parallel fetch, title+meta re-scoring, top 7 selected
+    // Phase C — parallel fetch, title+meta re-scoring, tier-guaranteed selection
     const fetchResults = await Promise.allSettled(
       urlScored.map(({ link }) =>
         fetch(link, { headers, signal: AbortSignal.timeout(4000) })
@@ -205,23 +268,45 @@ export default async function handler(req, res) {
       const result = fetchResults[i];
       const { ok, html } = (result.status === 'fulfilled' && result.value) ? result.value : { ok: false, html: '' };
       const titleMetaText = ok ? extractTitleAndMeta(html) : '';
-      const titleMetaScore = scoreText(titleMetaText, priorityKeywords);
-      return { ...candidate, ok, html: ok ? html : null, titleMetaScore };
+      const titleMetaScored = scoreTiered(titleMetaText);
+      const combined = combineTierScores(candidate.urlScored, titleMetaScored);
+      return { ...candidate, ok, html: ok ? html : null, combinedScore: combined.totalScore, dominantTier: combined.dominantTier };
     });
 
-    enriched.sort((a, b) => (b.urlScore + b.titleMetaScore) - (a.urlScore + a.titleMetaScore));
+    enriched.sort((a, b) => b.combinedScore - a.combinedScore);
 
-    for (const candidate of enriched.slice(0, 7)) {
+    // Tier-guaranteed selection: reserve 1 slot per tier, fill remaining by score
+    const selected = [];
+    const usedIndices = new Set();
+
+    for (const tier of [1, 2, 3]) {
+      const idx = enriched.findIndex((c, i) => c.dominantTier === tier && !usedIndices.has(i));
+      if (idx !== -1) {
+        selected.push(enriched[idx]);
+        usedIndices.add(idx);
+      }
+    }
+
+    for (let i = 0; i < enriched.length && selected.length < 6; i++) {
+      if (!usedIndices.has(i)) {
+        selected.push(enriched[i]);
+        usedIndices.add(i);
+      }
+    }
+
+    // Build pages with tiered character depth limits
+    for (const candidate of selected) {
       if (!candidate.html) {
         pages.push({ url: candidate.link, title: candidate.link, text: '', status: 'failed to load' });
         continue;
       }
       const titleMatch = candidate.html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : candidate.link;
+      const charLimit = candidate.dominantTier === 1 ? 3000 : candidate.dominantTier === 2 ? 2500 : 2000;
       pages.push({
         url: candidate.link,
         title,
-        text: extractText(candidate.html).substring(0, 1500),
+        text: extractText(candidate.html).substring(0, charLimit),
         status: 'ok',
       });
     }
