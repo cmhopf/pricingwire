@@ -14,7 +14,7 @@
     "@anthropic-ai/sdk": "^0.20.0",
     "react-markdown": "^9.0.0",
     "remark-gfm": "^4.0.0",
-    "@vercel/blob": "latest",
+    "@vercel/blob": "^2.3.0",
     "@upstash/ratelimit": "^2.0.0",
     "@upstash/redis": "^1.28.0"
   }
