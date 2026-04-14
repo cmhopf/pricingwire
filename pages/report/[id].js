@@ -142,7 +142,7 @@ export default function ReportPage() {
                   Anticipating the top objections from {personas.join(', ')} — with sharp, confident responses.
                 </p>
                 <div className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.personaObjections || ''}</ReactMarkdown>
                 </div>
               </div>
 
@@ -187,7 +187,7 @@ export default function ReportPage() {
               </button>
               {auditExpanded && (
                 <div style={{ marginTop: '20px' }} className="md-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis.sourceAudit || ''}</ReactMarkdown>
                 </div>
               )}
             </div>
@@ -249,12 +249,9 @@ const s = {
   companyOverview: { fontSize: '16px', color: body, lineHeight: '1.75' },
 
   divider:    { height: '1px', backgroundColor: border },
-  grid2:      { display: 'grid', gridTemplateColumns: '1fr 1fr' },
   block:      { padding: '28px 32px' },
   blockLabel: { fontSize: '16px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', color: ink, marginBottom: '12px' },
   blockText:  { fontSize: '16px', lineHeight: '1.75', color: body },
-  ul:         { paddingLeft: '18px', margin: 0 },
-  li:         { fontSize: '16px', lineHeight: '1.7', color: body, marginBottom: '10px' },
 
   deepBlock:      { padding: '28px 32px', borderBottom: `1px solid ${border}`, backgroundColor: bg },
   deepBlockLabel: { fontSize: '16px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', color: ink, marginBottom: '16px' },
