@@ -192,7 +192,15 @@ export default async function handler(req, res) {
   }
 
   const { url, singlePageOnly, personas } = req.body;
-  const effectivePersonas = (Array.isArray(personas) && personas.length > 0) ? personas : ['CEO', 'CRO', 'CFO'];
+  const effectivePersonas = (Array.isArray(personas) && personas.length > 0)
+    ? personas
+        .slice(0, 4)
+        .map(p => String(p).replace(/[^a-zA-Z0-9 &.\-\/]/g, '').trim().substring(0, 40))
+        .filter(Boolean)
+    : ['CEO', 'CRO', 'CFO'];
+  if (effectivePersonas.length === 0) {
+    return res.status(400).json({ error: 'At least one valid persona is required.' });
+  }
   const personaList = effectivePersonas.join(', ');
   const personaSlash = effectivePersonas.join('/');
 
