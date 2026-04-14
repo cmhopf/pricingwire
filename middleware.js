@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 // ── Rate limiter — 4 requests per 2-hour sliding window per IP ────────────────
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(20, '2 h'),
+  limiter: Ratelimit.slidingWindow(4, '2 h'),
   analytics: false,
 });
 
