@@ -1,5 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 
+// ── RETIRED — this endpoint is no longer called by the frontend ─────────────
+// Kept for reference. Returns 410 Gone to prevent unauthorized use.
+
 // Strip HTML tags and return clean text
 function extractText(html) {
   return html
@@ -38,6 +41,8 @@ function extractLinks(html, baseUrl) {
 }
 
 export default async function handler(req, res) {
+  return res.status(410).json({ error: 'This endpoint has been retired.' });
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
