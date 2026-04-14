@@ -381,20 +381,18 @@ Return markdown-formatted objection handling for ${personaList}. For each person
 
 - [One sentence response.]
 - [One sentence response.]
-- [Optional third bullet — one sentence only if genuinely needed.]
 
 **"[Second objection stated as a direct quote]"**
 
 - [One sentence response.]
 - [One sentence response.]
-- [Optional third bullet — one sentence only if genuinely needed.]
 
 CRITICAL FORMATTING RULES FOR STEP 3:
 - The objection text in quotes MUST be wrapped in bold markdown: **"..."**
 - Leave exactly one blank line between the bolded objection and its bullet-point responses
 - Each bullet MUST be exactly one sentence — no run-ons, no semicolons joining two thoughts
-- Maximum 3 bullets per objection response
-- Each set of bullets must collectively address: ROI justification, risk mitigation, and ease of adoption — in a sharp, confident manner
+- Exactly 2 bullets per objection response — no more, no fewer — select only the top 2 most relevant, credible and convincing responses
+- Each set of 2 bullets must collectively address: ROI justification, risk mitigation, and ease of adoption — in a sharp, confident manner
 
 STEP 4 — COMPANY PROFILE
 Using all pages analyzed, return the following keys:
