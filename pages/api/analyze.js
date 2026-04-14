@@ -408,7 +408,7 @@ CRITICAL RULES FOR STEP 4 — violating any of these is unacceptable:
 - targetBuyer MUST be a single sentence only
 
 STEP 5 — VALUE TIMELINE
-Return 4 flat string keys. Each value is a markdown string with exactly 2 bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Write each bullet as a direct, declarative statement — no "you will" or "you'll" language. Begin each bullet with an action verb. Tailor all outcomes to ${personaSlash} priorities.
+Return 4 flat string keys. Each value is a markdown string with exactly 2 bullet points (- prefix). Draw entirely from the analysis above — never invent facts. Write each bullet as a direct, declarative statement — no "you will" or "you'll" language. Begin each bullet with an action verb. Tailor all outcomes to ${personaSlash} priorities. HARD LIMIT: Each bullet point must be 190 characters or fewer — count every character and optimize wording to fit precisely within this limit.
 
 CRITICAL: All 4 keys — payoffMonth1, payoffMonth3, payoffMonth6, payoffBeyond — MUST be present and non-empty. Each must represent a meaningfully distinct but credible and realistic time horizon. IF content is similar, the same or not credible based on website content review, THEN populate with "nothing credible found for this window of time". Skipping any period is not permitted.
 
@@ -440,6 +440,7 @@ CRITICAL RULES FOR STEP 6:
 - Address the company directly — never write from the perspective of their customers or prospects
 - Each priority title must be specific to this company's situation — never generic
 - Maximum 2 bullets per priority — 1 bullet is acceptable and preferred if sufficient
+- HARD LIMIT: Each bullet point must be 190 characters or fewer — count every character and optimize wording to fit precisely within this limit
 - At least one priority MUST encourage an "Always Be Experimenting" mindset — Claude decides which priority this fits best
 - Order the three priorities by what is most urgent and impactful for this specific company
 - All content must be grounded in the website analysis — never invent facts
