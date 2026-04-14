@@ -462,7 +462,7 @@ CRITICAL: Return ONLY a valid JSON object. No preamble, no markdown fences, no c
     try {
       analysis = JSON.parse(raw);
     } catch {
-      throw new Error('Could not parse assessment response. Please try again.');
+      throw new Error('Parser dropped the ball ... but did not take it home. This is rare ... please try again.');
     }
 
     return res.status(200).json(analysis);
