@@ -159,7 +159,7 @@ export default function Home() {
           {!analysis && !loading && (
           <div style={s.inputCard}>
             <form onSubmit={handleSubmit}>
-              <label style={s.label}>Company website URL</label>
+              <label style={s.label}>Website / URL</label>
               <div className="input-row" style={s.inputRow}>
                 <input
                   type="url"
@@ -395,6 +395,35 @@ export default function Home() {
             </div>
           )}
 
+          {/* ── NEXT STEPS ── */}
+          {analysis && (
+            <div style={s.nextStepsWrap}>
+              <div style={s.nextStepsHeader}>
+                <span style={s.nextStepsPill}>Now What?</span>
+                <p style={s.deepSubtitle}>Here's how to use your Value Impact Assessment</p>
+              </div>
+              <div style={s.nextStepsBody}>
+                <div style={s.deepBlockLabel}>🚀 Next Steps</div>
+                <p style={{ ...s.deepNote, marginBottom: '20px' }}>Your Top 3 Priorities — validate, operationalize, and monetize this assessment.</p>
+                {[
+                  analysis.nextStep1,
+                  analysis.nextStep2,
+                  analysis.nextStep3,
+                ].map((content, i, arr) => (
+                  <div key={i} style={{
+                    paddingTop:    i === 0 ? '0' : '16px',
+                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
+                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
+                  }}>
+                    <div className="md-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ── ACTIONS ── */}
           {analysis && !loading && (
             <div style={s.actionsWrap}>
@@ -426,8 +455,8 @@ export default function Home() {
                 </p>
               )}
 
-              {!shareId && (
-                <div style={s.actionBtns}>
+              <div style={s.actionBtns}>
+                {!shareId && (
                   <button
                     onClick={handleShare}
                     disabled={shareStatus === 'saving'}
@@ -440,38 +469,17 @@ export default function Home() {
                   >
                     {shareStatus === 'saving' ? 'Saving…' : '🔗 Generate Share Link'}
                   </button>
-                </div>
-              )}
-
-            </div>
-          )}
-
-          {/* ── NEXT STEPS ── */}
-          {analysis && (
-            <div style={s.nextStepsWrap}>
-              <div style={s.nextStepsHeader}>
-                <span style={s.nextStepsPill}>Now What?</span>
-                <p style={s.deepSubtitle}>Here's how to use your Value Impact Assessment</p>
+                )}
+                <a
+                  href="https://www.pricingwire.com/pricing-strategy-sessions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ ...s.btn, backgroundColor: ink, color: '#fff', textDecoration: 'none' }}
+                >
+                  Get Help
+                </a>
               </div>
-              <div style={s.nextStepsBody}>
-                <div style={s.deepBlockLabel}>🚀 Next Steps</div>
-                <p style={{ ...s.deepNote, marginBottom: '20px' }}>Your Top 3 Priorities — validate, operationalize, and monetize this assessment.</p>
-                {[
-                  analysis.nextStep1,
-                  analysis.nextStep2,
-                  analysis.nextStep3,
-                ].map((content, i, arr) => (
-                  <div key={i} style={{
-                    paddingTop:    i === 0 ? '0' : '16px',
-                    paddingBottom: i < arr.length - 1 ? '16px' : '0',
-                    borderBottom:  i < arr.length - 1 ? `1px solid ${border}` : 'none',
-                  }}>
-                    <div className="md-content">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content || ''}</ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
             </div>
           )}
 
